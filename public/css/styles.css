@@ -94,6 +94,67 @@ footer {
     margin-top: 2rem;
 }
 
+/* 詳細ページと共通するスタイル */
+.route-detail {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.route-detail h3 {
+    color: #333;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.route-detail ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.route-detail li {
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.status {
+    font-weight: bold;
+}
+
+.status.normal {
+    color: green;
+}
+
+.status.cancelled {
+    color: red;
+}
+
+.status.delayed {
+    color: orange;
+}
+
+/* お問い合わせページスタイル */
+#contact ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#contact li {
+    margin-bottom: 10px;
+    font-size: 16px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+#contact li strong {
+    color: #333;
+    font-weight: bold;
+}
+
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
     body {

@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}お問い合わせ{% endblock %}
+
+{% block body %}
+<main>
+    <section id="contact">
+        <h2>お問い合わせ</h2>
+        <p>以下の方法でお問い合わせいただけます。</p>
+        <ul>
+            <li>
+                <strong>Email:</strong>
+                <p>{{ contact_data.email }}</p>
+            </li>
+            <li>
+                <strong>電話番号:</strong>
+                <p>{{ contact_data.phone }}</p>
+            </li>
+            <li>
+                <strong>住所:</strong>
+                <p>{{ contact_data.address }}</p>
+            </li>
+        </ul>
+    </section>
+</main>
+{% endblock %}
