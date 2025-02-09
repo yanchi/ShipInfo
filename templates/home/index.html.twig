@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}フェリー運航情報{% endblock %}
+
+{% block body %}
+<main>
+    <section id="home">
+        <h2>現在の運航状況</h2>
+        {% if ship_data is not empty %}
+            {% for ship in ship_data %}
+            <div class="ferry-status">
+                <h3>{{ ship.name }}</h3>
+                <ul>
+                {% for route in ship.routes %}
+                <li>{{ route.name }}: <span class="status {{ route.up_status }}">{{ route.up_status_text }}</span> / <span class="status {{ route.down_status }}">{{ route.down_status_text }}</span></li>
+                {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>現在、運航情報はありません。</p>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}
