@@ -12,7 +12,7 @@
                 <h3>{{ ship.name }}</h3>
                 <ul>
                 {% for route in ship.routes %}
-                <li>{{ route.name }}: <span class="status {{ route.up_status }}">{{ route.up_status_text }}</span> / <span class="status {{ route.down_status }}">{{ route.down_status_text }}</span></li>
+                <li>{{ route.name }}: <span class="status {{ route.status }}">{{ route.status_text }}</span> </li>
                 {% endfor %}
                 </ul>
             </div>

@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}航路詳細{% endblock %}
+
+{% block body %}
+<main>
+    <section id="route-details">
+        <h2>航路詳細情報</h2>
+
+        {% if route_details is not empty %}
+            {% for detail in route_details %}
+            <div class="route-detail">
+                <h3>{{ detail.company }}</h3>
+                <p>航路: {{ detail.route_name }}</p>
+                <ul>
+                    <li>上り状況: <span class="status {{ detail.up_status|lower }}">{{ detail.up_status_text }}</span></li>
+                     <li>下り状況: <span class="status {{ detail.down_status|lower }}">{{ detail.down_status_text }}</span></li>
+                    <li>出発時刻: {{ detail.departure_time }}</li>
+                    <li>到着時刻: {{ detail.arrival_time }}</li>
+                </ul>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>現在、詳細情報はありません。</p>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}
