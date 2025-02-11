@@ -43,7 +43,7 @@ class AppFixtures extends Fixture
         // 運航情報データ
         $operation1 = new Operation();
         $operation1->setRoute($route1);
-        $operation1->setOperationDate(new \DateTime("2025-02-10"));
+        $operation1->setOperationDate(new \DateTime("2025-02-11"));
         $operation1->setDirection("上り");
         $operation1->setStatus("normal");
         $operation1->setStatusText("通常運航");
@@ -56,7 +56,7 @@ class AppFixtures extends Fixture
 
         $operation2 = new Operation();
         $operation2->setRoute($route2);
-        $operation2->setOperationDate(new \DateTime("2025-02-10"));
+        $operation2->setOperationDate(new \DateTime("2025-02-11"));
         $operation2->setDirection("下り");
         $operation2->setStatus("cancelled");
         $operation2->setStatusText("欠航");

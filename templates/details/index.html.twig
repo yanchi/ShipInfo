@@ -1,27 +1,69 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}航路詳細{% endblock %}
+{% block title %}今日の運航情報{% endblock %}
 
 {% block body %}
 <main>
-    <section id="route-details">
-        <h2>航路詳細情報</h2>
+    <section id="operations-today">
+        <h2>今日の運航情報</h2>
 
-        {% if route_details is not empty %}
-            {% for detail in route_details %}
-            <div class="route-detail">
-                <h3>{{ detail.company }}</h3>
-                <p>航路: {{ detail.route_name }}</p>
-                <ul>
-                    <li>上り状況: <span class="status {{ detail.up_status|lower }}">{{ detail.up_status_text }}</span></li>
-                     <li>下り状況: <span class="status {{ detail.down_status|lower }}">{{ detail.down_status_text }}</span></li>
-                    <li>出発時刻: {{ detail.departure_time }}</li>
-                    <li>到着時刻: {{ detail.arrival_time }}</li>
-                </ul>
-            </div>
+        {% if companies is not empty %}
+            {% for company in companies %}
+                <div class="company-section">
+                    <h3>フェリー会社: {{ company.name }}</h3>
+
+                    {% if company.routes is not empty %}
+                        {% for route in company.routes %}
+                            <div class="route-section">
+                                <h4>航路: {{ route.name }}</h4>
+
+                                {% if route.operations is not empty %}
+                                    <table class="operations-table">
+                                        <thead>
+                                            <tr>
+                                                <th>運航日</th>
+                                                <th>方向</th>
+                                                <th>状況</th>
+                                                <th>状況詳細</th>
+                                                <th>出発時刻</th>
+                                                <th>到着時刻</th>
+                                                <th>備考</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for operation in route.operations %}
+                                                <tr>
+                                                    <td>{{ operation.operationDate|date('Y-m-d') }}</td>
+                                                    <td>{{ operation.direction }}</td>
+                                                    <td>
+                                                        <span class="status {{ operation.status|lower }}">
+                                                            {{ operation.status }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ operation.statusText }}</td>
+                                                    <td>{{ operation.departureTime|date('H:i') }}</td>
+                                                    <td>{{ operation.arrivalTime|date('H:i') }}</td>
+                                                    <td>{{ operation.memo }}</td>
+                                                </tr>
+                                            {% else %}
+                                                <tr>
+                                                    <td colspan="7">運航情報がありません。</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                {% else %}
+                                    <p class="no-data">この航路には本日の運航情報がありません。</p>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="no-data">このフェリー会社には登録された航路がありません。</p>
+                    {% endif %}
+                </div>
             {% endfor %}
         {% else %}
-            <p>現在、詳細情報はありません。</p>
+            <p class="no-data">本日の運航情報はありません。</p>
         {% endif %}
     </section>
 </main>

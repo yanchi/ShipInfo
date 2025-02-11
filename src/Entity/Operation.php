@@ -22,7 +22,7 @@ class Operation
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $operationDate = null;
 
-    #[ORM\Column(type: "direction_enum", nullable: false)]
+    #[ORM\Column(length: 50, nullable: true)]
     private ?string $direction = null;
 
     #[ORM\Column(length: 50, nullable: true)]

@@ -2,42 +2,40 @@
 
 namespace App\Controller;
 
+use Psr\Clock\ClockInterface;
+use App\Repository\CompanyRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-final class DetailsController extends AbstractController
+class DetailsController extends AbstractController
 {
-    #[Route('/details', name: 'app_details')]
-    public function index(): Response
-    {
-        // 航路詳細データ
-        $routeDetails = [
-            [
-                'company' => 'A\'LINE',
-                'route_name' => '徳之島 ⇔ 鹿児島',
-                'up_status_text' => '通常運航',
-                'down_status_text' => '欠航',
-                'up_status' => 'normal',
-                'down_status' => 'cancelled',
-                'departure_time' => '08:00',
-                'arrival_time' => '12:00',
-            ],
-            [
-                'company' => 'マリックスライン',
-                'route_name' => '徳之島 ⇔ 那覇',
-                'up_status_text' => '遅延中',
-                'down_status_text' => '通常運航',
-                'up_status' => 'delayed',
-                'down_status' => 'normal',
-                'departure_time' => '09:00',
-                'arrival_time' => '13:00',
-            ],
-        ];
+    private ClockInterface $clock;
 
+    public function __construct(ClockInterface $clock)
+    {
+        $this->clock = $clock;
+    }
+
+    #[Route('/details/today', name: 'app_details_today')]
+    public function index(
+        CompanyRepository $companyRepository
+    ): Response {
+        // 今日の日付を取得
+        $today = $this->clock->now(); // 現在の日時を取得（テスト時にモック可能）
+
+        // フェリー会社と紐づく航路と運航情報を取得
+        $companies = $companyRepository->createQueryBuilder('c')
+            ->leftJoin('c.routes', 'r')
+            ->leftJoin('r.operations', 'o', 'WITH', 'o.operationDate = :today')
+            ->setParameter('today', $today)
+            ->addSelect('r')
+            ->addSelect('o')
+            ->getQuery()
+            ->getResult();
 
         return $this->render('details/index.html.twig', [
-            'route_details' => $routeDetails,
+            'companies' => $companies,
         ]);
     }
 }
