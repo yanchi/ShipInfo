@@ -1,4 +1,9 @@
 /* 基本スタイル */
+/* 全体のbox-sizingを統一 */
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -173,52 +178,60 @@ footer {
     background-color: #f9f9f9;
 }
 
-/* 運航情報テーブル */
-.operations-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
+/* カードコンテナ */
+.route-cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* カード間の余白 */
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.operations-table th,
-.operations-table td {
+.route-card {
+    background: #ffffff;
     border: 1px solid #ddd;
-    padding: 0.8rem;
-    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 15px;
 }
 
-.operations-table th {
-    background-color: #0073e6;
-    color: white;
+/* カードの内容デザイン */
+.route-card h4 {
+    font-size: 1.2em;
+    color: #333;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+.route-card p {
+    margin: 5px 0;
+    font-size: 0.95em;
+    color: #555;
+}
+
+.route-card p span.label {
     font-weight: bold;
+    color: #333;
 }
 
-.operations-table tr:nth-child(even) {
-    background-color: #f2f2f2;
+/* フェリー会社のタイトル */
+.company-title {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
 }
 
-.operations-table .status.normal {
-    background-color: #d4edda;
-    color: #155724;
-    padding: 0.3rem 0.5rem;
-    border-radius: 4px;
-    font-weight: bold;
+/* 航路タイトル */
+.route-title {
+    font-size: 1.25rem;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
-.operations-table .status.delayed {
-    background-color: #fff3cd;
-    color: #856404;
-    padding: 0.3rem 0.5rem;
-    border-radius: 4px;
-    font-weight: bold;
-}
-
-.operations-table .status.cancelled {
-    background-color: #f8d7da;
-    color: #721c24;
-    padding: 0.3rem 0.5rem;
-    border-radius: 4px;
-    font-weight: bold;
+/* 運航詳細 */
+.operation-details p {
+    margin: 5px 0;
+    font-size: 0.9rem;
 }
 
 /* データなしのメッセージ */
@@ -257,5 +270,20 @@ footer {
 
     footer {
         font-size: 0.8rem;
+    }
+
+    .route-card {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .route-cards-container {
+        padding: 10px; /* 親要素の余白を調整 */
+    }
+
+    .route-card {
+        width: 100%; /* カードの幅を100%にする */
+        margin-bottom: 20px; /* カード間の余白を確保 */
     }
 }

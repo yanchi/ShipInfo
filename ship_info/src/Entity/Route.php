@@ -19,6 +19,9 @@ class Route
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $direction = null;
+
     #[ORM\ManyToOne(inversedBy: 'routes')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Company $company = null;
@@ -53,6 +56,18 @@ class Route
     public function setName(string $name): static
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getDirection(): ?string
+    {
+        return $this->direction;
+    }
+
+    public function setDirection(?string $direction): static
+    {
+        $this->direction = $direction;
 
         return $this;
     }

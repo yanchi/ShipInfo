@@ -23,9 +23,6 @@ class Operation
     private ?\DateTimeInterface $operationDate = null;
 
     #[ORM\Column(length: 50, nullable: true)]
-    private ?string $direction = null;
-
-    #[ORM\Column(length: 50, nullable: true)]
     private ?string $status = null;
 
     #[ORM\Column(length: 50, nullable: true)]
@@ -71,18 +68,6 @@ class Operation
     public function setOperationDate(\DateTimeInterface $operationDate): static
     {
         $this->operationDate = $operationDate;
-
-        return $this;
-    }
-
-    public function getDirection(): ?string
-    {
-        return $this->direction;
-    }
-
-    public function setDirection(?string $direction): static
-    {
-        $this->direction = $direction;
 
         return $this;
     }
