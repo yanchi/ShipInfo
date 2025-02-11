@@ -22,7 +22,7 @@ class DetailsController extends AbstractController
         CompanyRepository $companyRepository
     ): Response {
         // 今日の日付を取得
-        $today = $this->clock->now(); // 現在の日時を取得（テスト時にモック可能）
+        $today = $this->clock->now()->format('Y-m-d'); // 日付だけにフォーマット
 
         // フェリー会社と紐づく航路と運航情報を取得
         $companies = $companyRepository->createQueryBuilder('c')
