@@ -16,17 +16,17 @@ class DirectionType extends Type
 
     const NAME = 'direction_enum';
 
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
     {
         return "ENUM('上り', '下り')";
     }
 
-    public function convertToPHPValue($value, AbstractPlatform $platform)
+    public function convertToPHPValue($value, AbstractPlatform $platform): mixed
     {
         return $value;
     }
 
-    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    public function convertToDatabaseValue($value, AbstractPlatform $platform): mixed
     {
         if (!in_array($value, self::POSSIBLE_VALUES, true)) {
             throw new \InvalidArgumentException("Invalid direction value");
@@ -35,7 +35,7 @@ class DirectionType extends Type
         return $value;
     }
 
-    public function getName()
+    public function getName(): string
     {
         return self::NAME;
     }

@@ -45,7 +45,8 @@ class AppFixtures extends Fixture
         $operation1->setRoute($route1);
         $operation1->setOperationDate(new \DateTime("2025-02-10"));
         $operation1->setDirection("上り");
-        $operation1->setStatus("通常運航");
+        $operation1->setStatus("normal");
+        $operation1->setStatusText("通常運航");
         $operation1->setArrivalTime(new \DateTime("2025-02-10 14:00:00"));
         $operation1->setDepartureTime(new \DateTime("2025-02-10 10:00:00"));
         $operation1->setMemo("天候良好");
@@ -57,7 +58,8 @@ class AppFixtures extends Fixture
         $operation2->setRoute($route2);
         $operation2->setOperationDate(new \DateTime("2025-02-10"));
         $operation2->setDirection("下り");
-        $operation2->setStatus("欠航");
+        $operation2->setStatus("cancelled");
+        $operation2->setStatusText("欠航");
         $operation2->setMemo("台風のため欠航");
         $operation2->setCreatedAt(new \DateTimeImmutable());
         $operation2->setUpdatedAt(new \DateTimeImmutable());

@@ -22,11 +22,14 @@ class Operation
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $operationDate = null;
 
-    #[ORM\Column(type: "direction_enum")]
+    #[ORM\Column(type: "direction_enum", nullable: false)]
     private ?string $direction = null;
 
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $status = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $status_text = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $arrivalTime = null;
@@ -92,6 +95,18 @@ class Operation
     public function setStatus(?string $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getStatusText(): ?string
+    {
+        return $this->status_text;
+    }
+
+    public function setStatusText(?string $status_text): static
+    {
+        $this->status_text = $status_text;
 
         return $this;
     }

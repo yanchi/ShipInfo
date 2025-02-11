@@ -1,0 +1,6 @@
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+        server_version: '8.0.31'
+        logging: false
+        charset: utf8mb4
