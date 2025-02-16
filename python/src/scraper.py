@@ -1,5 +1,5 @@
-import requests
-from bs4 import BeautifulSoup
+import requests # type: ignore
+from bs4 import BeautifulSoup # type: ignore
 
 def scrape_example():
     url = "https://example.com"

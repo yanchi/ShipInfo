@@ -1,13 +1,14 @@
 import mysql.connector # type: ignore
 from scrape_operation_details import scrape_data  # スクレイピング処理を呼び出し
 from datetime import datetime
+import os
 
 # MySQLデータベース接続設定
 DB_CONFIG = {
-    'host': 'db',
-    'user': 'user',
-    'password': 'password',
-    'database': 'ship_info',
+    'host': os.getenv("MYSQL_HOST"),
+    'user': os.getenv("MYSQL_USER"),
+    'password': os.getenv("MYSQL_PASSWORD"),
+    'database': os.getenv("MYSQL_DATABASE"),
 }
 
 def save_kametoku_info():
