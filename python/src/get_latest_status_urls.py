@@ -1,5 +1,5 @@
-import requests
-from bs4 import BeautifulSoup
+import requests # type: ignore
+from bs4 import BeautifulSoup # type: ignore
 
 def get_latest_status_urls():
     url = "https://marixline.com/service/"
