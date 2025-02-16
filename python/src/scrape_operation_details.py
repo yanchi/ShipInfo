@@ -9,21 +9,24 @@ def get_kametoku_info(soup, direction):
 
     for service in services:
         port_name_tag = service.find("span", class_="port_name")
-        if port_name_tag and "亀徳港" in port_name_tag.get_text(strip=True):
-            departure_date = service.find("div", class_="departure").find("span", class_="date").get_text(strip=True)
-            status_detail = service.find("div", class_="status").get_text(strip=True)
-            departure_time = service.find("div", class_="departure").find("span", class_="time").get_text(strip=True)
-            arrival_time = service.find("div", class_="entry").find("span", class_="time").get_text(strip=True)
-            memo = service.find("div", class_="exp").get_text(strip=True) if service.find("div", class_="exp") else "N/A"
+        if not (port_name_tag and "亀徳港" in port_name_tag.get_text(strip=True)):
+            continue
 
-            kametoku_info.append({
-                "運航日": departure_date,
-                "方向": direction,
-                "状況詳細": status_detail,
-                "出発時刻": departure_time,
-                "到着時刻": arrival_time,
-                "備考": memo
-            })
+        # 各データを一度だけ抽出
+        departure_date = service.select_one("div.departure span.date").get_text(strip=True)
+        status_detail = service.select_one("div.status").get_text(strip=True)
+        departure_time = service.select_one("div.departure span.time").get_text(strip=True)
+        arrival_time = service.select_one("div.entry span.time").get_text(strip=True)
+        memo = service.select_one("div.exp").get_text(strip=True) if service.select_one("div.exp") else "N/A"
+
+        kametoku_info.append({
+            "運航日": departure_date,
+            "方向": direction,
+            "状況詳細": status_detail,
+            "出発時刻": departure_time,
+            "到着時刻": arrival_time,
+            "備考": memo
+        })
 
     return kametoku_info
 
