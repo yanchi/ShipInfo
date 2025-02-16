@@ -1,91 +1,28 @@
 <?php
-
+// src/DataFixtures/AppFixtures.php
 namespace App\DataFixtures;
 
-use App\Entity\Company;
-use App\Entity\Route;
-use App\Entity\Operation;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 
-class AppFixtures extends Fixture
+class AppFixtures extends Fixture implements DependentFixtureInterface
 {
     public function load(ObjectManager $manager): void
     {
-        // フェリー会社データ
-        $company1 = new Company();
-        $company1->setName("A'LINE");
-        $company1->setCreatedAt(new \DateTimeImmutable());
-        $company1->setUpdatedAt(new \DateTimeImmutable());
-        $manager->persist($company1);
+        // このクラス自体でデータを作成しない場合、空のloadメソッドでOK
+    }
 
-        $company2 = new Company();
-        $company2->setName("マリックスライン");
-        $company2->setCreatedAt(new \DateTimeImmutable());
-        $company2->setUpdatedAt(new \DateTimeImmutable());
-        $manager->persist($company2);
+    public function getDependencies(): array
+    {
+        $dependencies = [
+            \App\DataFixtures\Master\MasterFixtures::class, // マスターデータ
+        ];
 
-        // 航路データ
-        $route1 = new Route();
-        $route1->setName("徳之島 ⇔ 鹿児島");
-        $route1->setCompany($company1);
-        $route1->setDirection("上り");
-        $route1->setCreatedAt(new \DateTimeImmutable());
-        $route1->setUpdatedAt(new \DateTimeImmutable());
-        $manager->persist($route1);
+        // if ($_ENV['APP_ENV'] === 'test' || $_ENV['APP_ENV'] === 'dev') {
+        //     $dependencies[] = \App\DataFixtures\Test\TestFixtures::class; // テストデータ
+        // }
 
-        $route2 = new Route();
-        $route2->setName("徳之島 ⇔ 那覇");
-        $route2->setCompany($company2);
-        $route2->setDirection("下り");
-        $route2->setCreatedAt(new \DateTimeImmutable());
-        $route2->setUpdatedAt(new \DateTimeImmutable());
-        $manager->persist($route2);
-
-        $route3 = new Route();
-        $route3->setName("徳之島 ⇔ 那覇");
-        $route3->setCompany($company1);
-        $route3->setDirection("下り");
-        $route3->setCreatedAt(new \DateTimeImmutable());
-        $route3->setUpdatedAt(new \DateTimeImmutable());
-        $manager->persist($route3);
-
-        // 運航情報データ
-        $operation1 = new Operation();
-        $operation1->setRoute($route1);
-        $operation1->setOperationDate(new \DateTime("2025-02-11"));
-        $operation1->setStatus("normal");
-        $operation1->setStatusText("通常運航");
-        $operation1->setArrivalTime(new \DateTime("2025-02-10 14:00:00"));
-        $operation1->setDepartureTime(new \DateTime("2025-02-10 10:00:00"));
-        $operation1->setMemo("天候良好");
-        $operation1->setCreatedAt(new \DateTimeImmutable());
-        $operation1->setUpdatedAt(new \DateTimeImmutable());
-        $manager->persist($operation1);
-
-        $operation2 = new Operation();
-        $operation2->setRoute($route2);
-        $operation2->setOperationDate(new \DateTime("2025-02-11"));
-        $operation2->setStatus("cancelled");
-        $operation2->setStatusText("欠航");
-        $operation2->setMemo("台風のため欠航");
-        $operation2->setCreatedAt(new \DateTimeImmutable());
-        $operation2->setUpdatedAt(new \DateTimeImmutable());
-        $manager->persist($operation2);
-
-        $operation3 = new Operation();
-        $operation3->setRoute($route3);
-        $operation3->setOperationDate(new \DateTime("2025-02-11"));
-        $operation3->setStatus("normal");
-        $operation3->setStatusText("通常運航");
-        $operation3->setArrivalTime(new \DateTime("2025-02-10 14:00:00"));
-        $operation3->setDepartureTime(new \DateTime("2025-02-10 10:00:00"));
-        $operation3->setMemo("天候良好aaaa");
-        $operation3->setCreatedAt(new \DateTimeImmutable());
-        $operation3->setUpdatedAt(new \DateTimeImmutable());
-        $manager->persist($operation3);
-
-        // データを保存
-        $manager->flush();
+        return $dependencies;
     }
 }
