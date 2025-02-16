@@ -27,13 +27,13 @@ class DetailsController extends AbstractController
         // フェリー会社と紐づく航路と運航情報を取得
         $companies = $companyRepository->createQueryBuilder('c')
             ->leftJoin('c.routes', 'r')
-            ->leftJoin('r.operations', 'o', 'WITH', 'o.operationDate = :today')
+            ->leftJoin('r.operations', 'o', 'WITH', 'o.operationDate >= :today') // 条件を「本日以降」に変更
             ->setParameter('today', $today)
             ->addSelect('r')
             ->addSelect('o')
             ->getQuery()
             ->getResult();
-
+            
         return $this->render('details/index.html.twig', [
             'companies' => $companies,
         ]);
