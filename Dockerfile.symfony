@@ -1,0 +1,28 @@
+# PHPベースイメージ
+FROM php:8.2-apache
+
+# 必要なPHPモジュールをインストール
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libicu-dev \
+    libpq-dev \
+    && docker-php-ext-install \
+    intl pdo pdo_mysql
+
+# Composerのインストール
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Symfonyプロジェクトのセットアップ
+WORKDIR /var/www/html
+COPY ship_info/ /var/www/html/
+
+# Apache設定ファイルをコンテナにコピー
+COPY 000-default.conf /etc/apache2/sites-available/000-default.conf
+
+# Apacheの設定
+RUN a2ensite 000-default.conf
+RUN a2enmod rewrite
+
+# 必要なディレクトリの権限を設定
+RUN chown -R www-data:www-data /var/www/html/var /var/www/html/public

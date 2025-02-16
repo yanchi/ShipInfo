@@ -1,14 +1,6 @@
 import requests # type: ignore
 from bs4 import BeautifulSoup # type: ignore
 import os
-from dotenv import load_dotenv
-
-# Symfonyの.envファイルのパスを指定
-SYMFONY_ENV_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "../ship_info", ".env")
-env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "../ship_info", ".env")
-print(env_path)
-# .envをロード
-load_dotenv(SYMFONY_ENV_PATH)
 
 # 環境変数から値を取得
 MARIXLINE_SERVICE_URL = os.getenv("MARIXLINE_SERVICE_URL")

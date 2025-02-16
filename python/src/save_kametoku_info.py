@@ -4,8 +4,8 @@ from datetime import datetime
 
 # MySQLデータベース接続設定
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',
+    'host': 'db',
+    'user': 'user',
     'password': 'password',
     'database': 'ship_info',
 }

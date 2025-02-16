@@ -1,0 +1,25 @@
+# Pythonベースイメージ
+FROM python:3.10-slim
+
+# 必要なツールのインストール
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libssl-dev \
+    libffi-dev \
+    python3-dev \
+    && apt-get clean
+
+# 作業ディレクトリの設定
+WORKDIR /app
+
+# Python依存パッケージのインストール
+COPY python/requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install mysql-connector-python  # ここを追加
+RUN pip install python-dotenv  # ここを追加
+
+# ソースコードをコピー
+COPY python/ /app/
+
+# コンテナ起動時のデフォルトコマンド
+CMD ["python3", "-m", "http.server", "8000"]
