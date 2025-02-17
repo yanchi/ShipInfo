@@ -7,7 +7,9 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OperationRepository::class)]
-#[ORM\Table(name: "operations")]
+#[ORM\Table(name: "operations", uniqueConstraints: [
+    new ORM\UniqueConstraint(name: "unique_route_date", columns: ["route_id", "operation_date"])
+])]
 class Operation
 {
     #[ORM\Id]
@@ -16,10 +18,10 @@ class Operation
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'operations')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(name: "route_id", referencedColumnName: "id", nullable: false)]
     private ?Route $route = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(name: "operation_date", type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $operationDate = null;
 
     #[ORM\Column(length: 50, nullable: true)]
