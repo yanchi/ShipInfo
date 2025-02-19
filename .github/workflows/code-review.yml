@@ -38,7 +38,7 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # ← ここが重要！
 
-      - name: `past_reviews.txt` の存在確認
+      - name: past_reviews.txt の存在確認
         run: ls -la && cat past_reviews.txt || echo "No past_reviews.txt found"
 
       - name: 過去のレビュー履歴を保存
