@@ -45,6 +45,21 @@ class Operation
     #[ORM\Column]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    #[ORM\Column]
+    private ?string $test = null;
+
+    public function getTest(): ?string
+    {
+        return $this->test;
+    }
+
+    public function setTest(?string $test): static
+    {
+        $this->test = $test;
+
+        return $this;
+    }
+    
     public function getId(): ?int
     {
         return $this->id;
