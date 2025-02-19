@@ -1,9 +1,37 @@
 import openai
 import os
+import json
 import subprocess
 
 # OpenAI APIキーを取得
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
+# PR番号を取得
+pr_number = os.getenv("PR_NUMBER")
+
+# GitHub APIを使って「修正しないファイル一覧」を取得
+def get_skip_files(pr_number):
+    """ PRのコメントを取得し、「修正しないファイル一覧」を抽出する """
+    result = subprocess.run(
+        ["gh", "api", f"repos/{os.getenv('GITHUB_REPOSITORY')}/issues/{pr_number}/comments"],
+        capture_output=True,
+        text=True
+    )
+    
+    comments = json.loads(result.stdout)
+    skip_files = []
+    
+    for comment in comments:
+        if "### 修正しないファイル一覧" in comment["body"]:
+            lines = comment["body"].split("\n")
+            for line in lines:
+                if line.startswith("- "):  # ファイルリスト部分
+                    skip_files.append(line[2:].strip())  # "- " を削除
+    
+    return skip_files
+
+# 修正しないファイルを取得
+skip_files = get_skip_files(pr_number)
 
 # 変更があったファイルを取得
 with open("changed_files.txt", "r") as file:
@@ -20,16 +48,15 @@ if os.path.exists("past_reviews.txt"):
     with open("past_reviews.txt", "r", encoding="utf-8") as file:
         past_reviews = file.read()
 
-# 既にレビューしたファイルを記録するリスト
-reviewed_files = set()
-if os.path.exists("reviewed_files.txt"):
-    with open("reviewed_files.txt", "r", encoding="utf-8") as file:
-        reviewed_files = set(file.read().splitlines())
-
 # 各ファイルを個別にレビューし、コメントを投稿
 for file_path in changed_files:
+    # スキップ対象のファイルかチェック
+    if file_path in skip_files:
+        print(f"Skipping {file_path}, marked as '修正しない'.")
+        continue
+
     # PHP, JS, TS, Pythonなどのコードファイルのみを対象にする
-    if file_path.endswith((".php", ".js", ".py", ".ts")) and file_path not in reviewed_files:
+    if file_path.endswith((".php", ".js", ".py", ".ts")):
         try:
             with open(file_path, "r", encoding="utf-8") as code_file:
                 code_content = code_file.read()
@@ -61,7 +88,7 @@ for file_path in changed_files:
             response = client.chat.completions.create(
                 model="gpt-4-turbo",
                 messages=[{"role": "system", "content": review_prompt}],
-                temperature=0  # ← これで毎回同じような回答になる
+                temperature=0
             )
 
             # レビュー結果を取得
@@ -69,18 +96,11 @@ for file_path in changed_files:
 
             # GitHub Pull Request にコメントを投稿
             subprocess.run([
-                "gh", "pr", "comment", os.getenv("PR_NUMBER"),
+                "gh", "pr", "comment", pr_number,
                 "--body", f"### レビュー結果（{file_path}）\n{review_text}"
             ], check=True)
 
-            # レビュー済みファイルに追加
-            reviewed_files.add(file_path)
-
         except Exception as e:
             print(f"Error processing {file_path}: {e}")
-
-# レビュー済みファイルのリストを保存（次回の実行でスキップするため）
-with open("reviewed_files.txt", "w", encoding="utf-8") as file:
-    file.write("\n".join(reviewed_files))
 
 print("All reviews completed.")
