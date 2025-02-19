@@ -11,6 +11,11 @@ jobs:
     steps:
       - name: リポジトリをチェックアウト
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # ← すべての履歴を取得
+
+      - name: `origin/main` を取得
+        run: git fetch origin main  # ← `origin/main` を明示的に取得
 
       - name: 過去のレビュー履歴を復元
         uses: actions/download-artifact@v4
