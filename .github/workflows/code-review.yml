@@ -1,8 +1,5 @@
 name: Code Review
 
-env:
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 on:
   pull_request:
     types: [opened, synchronize]
@@ -14,20 +11,16 @@ jobs:
     steps:
       - name: リポジトリをチェックアウト
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # ← すべての履歴を取得
 
-      - name: origin/main を取得
-        run: git fetch origin main  # ← `origin/main` を明示的に取得
-
-      - name: 過去のレビュー履歴を復元
+      - name: 過去のレビュー履歴を復元（PR作成時は実行しない）
+        if: github.event.action == 'synchronize'
         uses: actions/download-artifact@v4
         with:
           name: past-reviews-${{ github.event.pull_request.number }}
         continue-on-error: true  # 初回レビュー時にはファイルが存在しないため
 
       - name: 変更ファイルを取得
-        run: git diff --name-only origin/main > changed_files.txt
+        run: git fetch origin main && git diff --name-only origin/main > changed_files.txt
 
       - name: Pythonのセットアップ
         uses: actions/setup-python@v4
@@ -43,8 +36,13 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # ← ここが重要！
+
+      - name: `past_reviews.txt` の存在確認
+        run: ls -la && cat past_reviews.txt || echo "No past_reviews.txt found"
 
       - name: 過去のレビュー履歴を保存
+        if: github.event.action == 'synchronize'  # PR更新時のみ保存
         uses: actions/upload-artifact@v4
         with:
           name: past-reviews-${{ github.event.pull_request.number }}
