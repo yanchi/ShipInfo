@@ -1,14 +1,15 @@
 import openai
 import os
+import subprocess
 
-# OpenAI APIキーを環境変数から取得
+# OpenAI APIキーを取得
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # コードの読み込み
 with open("ship_info/src/Entity/Operation.php", "r") as file:
     code = file.read()
 
-# AIにコードレビューを依頼（新しいAPI形式）
+# AIにコードレビューを依頼
 client = openai.OpenAI()
 
 response = client.chat.completions.create(
@@ -19,8 +20,11 @@ response = client.chat.completions.create(
     ]
 )
 
-# レビュー結果を出力
+# レビュー結果
 review_text = response.choices[0].message.content
-print("=== AI Code Review Result ===", flush=True)
-print(review_text, flush=True)
-print("=== End of Review ===", flush=True)
+
+# GitHub Pull Request にコメントを投稿
+subprocess.run([
+    "gh", "pr", "comment", os.getenv("PR_NUMBER"),
+    "--body", review_text
+], check=True)
