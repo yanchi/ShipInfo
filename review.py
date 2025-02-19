@@ -9,6 +9,12 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 # PR番号を取得
 pr_number = os.getenv("PR_NUMBER")
 
+# 過去のレビュー履歴を取得
+past_reviews = ""
+if os.path.exists("past_reviews.txt"):
+    with open("past_reviews.txt", "r", encoding="utf-8") as file:
+        past_reviews = file.read()
+
 # GitHub APIを使って「修正しないファイル一覧」を取得
 def get_skip_files(pr_number):
     """ PRのコメントを取得し、「修正しないファイル一覧」を抽出する """
@@ -42,12 +48,6 @@ if not changed_files:
     print("No changed files to review.")
     exit(0)
 
-# 過去のレビュー履歴を取得（履歴があれば一貫したレビューが可能）
-past_reviews = ""
-if os.path.exists("past_reviews.txt"):
-    with open("past_reviews.txt", "r", encoding="utf-8") as file:
-        past_reviews = file.read()
-
 # 各ファイルを個別にレビューし、コメントを投稿
 for file_path in changed_files:
     # スキップ対象のファイルかチェック
@@ -67,15 +67,15 @@ for file_path in changed_files:
 以下のルールに従ってコードをレビューし、統一された評価基準を適用してください。
 **必ず日本語で回答してください！**
 
-【過去のレビュー履歴】（参考にして、同じ基準でレビューしてください）
-{past_reviews}
-
 【レビューガイドライン】
 - 変数名・関数名が適切か（キャメルケース・スネークケースなどの命名規則を考慮）
 - エラーハンドリングが適切に行われているか
 - パフォーマンスや保守性に問題がないか
 - セキュリティリスクがないか
 - コードの可読性が確保されているか
+
+【過去のレビュー履歴】（参考にして、同じ基準でレビューしてください）
+{past_reviews}
 
 【レビュー対象のファイル】 {file_path}
 
@@ -100,7 +100,14 @@ for file_path in changed_files:
                 "--body", f"### レビュー結果（{file_path}）\n{review_text}"
             ], check=True)
 
+            # 過去のレビュー履歴を追加
+            past_reviews += f"\n\n【{file_path} のレビュー】\n{review_text}"
+
         except Exception as e:
             print(f"Error processing {file_path}: {e}")
+
+# 過去のレビュー履歴を保存
+with open("past_reviews.txt", "w", encoding="utf-8") as file:
+    file.write(past_reviews)
 
 print("All reviews completed.")

@@ -1,38 +1,43 @@
-name: AI Code Review
+name: Code Review
 
 on:
   pull_request:
     types: [opened, synchronize]
 
 jobs:
-  review:
+  code-review:
     runs-on: ubuntu-latest
 
     steps:
       - name: リポジトリをチェックアウト
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Pythonをセットアップ
-        uses: actions/setup-python@v4
+      - name: 過去のレビュー履歴を復元
+        uses: actions/download-artifact@v3
         with:
-          python-version: "3.10"
+          name: past-reviews-${{ github.event.pull_request.number }}
+        continue-on-error: true  # 初回レビュー時にはファイルが存在しないため
 
-      - name: 必要なライブラリをインストール
+      - name: 変更ファイルを取得
+        run: git diff --name-only origin/main > changed_files.txt
+
+      - name: Pythonのセットアップ
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.9"
+
+      - name: 必要なパッケージをインストール
         run: pip install openai
 
-      - name: 変更があったファイルを取得
-        run: |
-          git fetch origin ${{ github.event.pull_request.base.ref }}
-          git diff --name-only origin/${{ github.event.pull_request.base.ref }} > changed_files.txt
-
-      - name: GitHub CLIをセットアップ
-        run: |
-          sudo apt update && sudo apt install -y gh
-          gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
-
-      - name: AIコードレビュー実行（Pull Requestにコメント）
+      - name: コードレビューを実行
+        run: python review.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: python review.py
+          GITHUB_REPOSITORY: ${{ github.repository }}
+
+      - name: 過去のレビュー履歴を保存
+        uses: actions/upload-artifact@v3
+        with:
+          name: past-reviews-${{ github.event.pull_request.number }}
+          path: past_reviews.txt
