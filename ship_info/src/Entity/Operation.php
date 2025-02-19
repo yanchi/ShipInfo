@@ -28,7 +28,7 @@ class Operation
     private ?string $status = null;
 
     #[ORM\Column(length: 50, nullable: true)]
-    private ?string $status_text = null;
+    private ?string $statusText = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $arrivalTime = null;
@@ -59,7 +59,7 @@ class Operation
 
         return $this;
     }
-    
+
     public function getId(): ?int
     {
         return $this->id;
@@ -103,12 +103,12 @@ class Operation
 
     public function getStatusText(): ?string
     {
-        return $this->status_text;
+        return $this->statusText;
     }
 
-    public function setStatusText(?string $status_text): static
+    public function setStatusText(?string $statusText): static
     {
-        $this->status_text = $status_text;
+        $this->statusText = $statusText;
 
         return $this;
     }
