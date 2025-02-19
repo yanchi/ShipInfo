@@ -20,7 +20,14 @@ jobs:
       - name: 必要なライブラリをインストール
         run: pip install openai
 
-      - name: AIコードレビュー実行
+      - name: GitHub CLIをセットアップ
+        run: |
+          sudo apt update && sudo apt install -y gh
+          gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: AIコードレビュー実行（Pull Requestにコメント）
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: python review.py
