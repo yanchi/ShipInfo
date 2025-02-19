@@ -1,5 +1,8 @@
 name: Code Review
 
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 on:
   pull_request:
     types: [opened, synchronize]
