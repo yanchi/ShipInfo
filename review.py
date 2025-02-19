@@ -24,7 +24,18 @@ def get_skip_files(pr_number):
         text=True
     )
     
-    comments = json.loads(result.stdout)
+    # `stdout` が空ならエラーを出力
+    if not result.stdout.strip():
+        print("GitHub API returned an empty response. No comments found.")
+        return []
+
+    try:
+        comments = json.loads(result.stdout)
+    except json.JSONDecodeError as e:
+        print(f"JSON Decode Error: {e}")
+        print(f"Raw response: {result.stdout}")
+        return []
+
     skip_files = []
     
     for comment in comments:
