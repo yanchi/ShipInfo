@@ -37,6 +37,7 @@ if os.path.exists("past_reviews.txt"):
         past_reviews = file.read()
 
 # レビュー用のプロンプトを作成
+code_snippets_text = "\n".join(code_snippets)
 review_prompt = f"""
 あなたは経験豊富なコードレビュワーです。
 以下のルールに従ってコードをレビューし、統一された評価基準を適用してください。
@@ -62,7 +63,7 @@ review_prompt = f"""
 - 修正の理由を説明
 
 【レビュー対象のコード】
-{'\n'.join(code_snippets)}
+{code_snippets_text}
 """
 
 # AIにコードレビューを依頼
