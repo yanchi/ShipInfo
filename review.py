@@ -5,26 +5,43 @@ import subprocess
 # OpenAI APIキーを取得
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# コードの読み込み
-with open("ship_info/src/Entity/Operation.php", "r") as file:
-    code = file.read()
+# 変更があったファイルを取得
+with open("changed_files.txt", "r") as file:
+    changed_files = [line.strip() for line in file.readlines()]
 
-# AIにコードレビューを依頼
-client = openai.OpenAI()
+# 変更ファイルがなければ終了
+if not changed_files:
+    print("No changed files to review.")
+    exit(0)
 
-response = client.chat.completions.create(
-    model="gpt-4-turbo",
-    messages=[
-        {"role": "system", "content": "あなたは優秀なコードレビュワーです。"},
-        {"role": "user", "content": f"以下のコードをレビューしてください。\n\n{code}"}
-    ]
-)
+# すべての変更ファイルのコードを読み込む
+code_snippets = []
+for file_path in changed_files:
+    # PHPなどのコードファイルのみ対象にする（不要なら削除）
+    if file_path.endswith((".php", ".js", ".py", ".ts")):
+        try:
+            with open(file_path, "r", encoding="utf-8") as code_file:
+                code_snippets.append(f"### {file_path} ###\n{code_file.read()}\n")
+        except Exception as e:
+            print(f"Error reading {file_path}: {e}")
 
-# レビュー結果
-review_text = response.choices[0].message.content
+# すべてのコードをまとめてAIに送信
+if code_snippets:
+    client = openai.OpenAI()
+    
+    response = client.chat.completions.create(
+        model="gpt-4-turbo",
+        messages=[
+            {"role": "system", "content": "あなたは優秀なコードレビュワーです。"},
+            {"role": "user", "content": "以下のコードをレビューしてください。\n\n" + "\n".join(code_snippets)}
+        ]
+    )
 
-# GitHub Pull Request にコメントを投稿
-subprocess.run([
-    "gh", "pr", "comment", os.getenv("PR_NUMBER"),
-    "--body", review_text
-], check=True)
+    # レビュー結果を取得
+    review_text = response.choices[0].message.content
+
+    # GitHub Pull Request にコメントを投稿
+    subprocess.run([
+        "gh", "pr", "comment", os.getenv("PR_NUMBER"),
+        "--body", review_text
+    ], check=True)

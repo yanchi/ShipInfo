@@ -20,6 +20,11 @@ jobs:
       - name: 必要なライブラリをインストール
         run: pip install openai
 
+      - name: 変更があったファイルを取得
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+          git diff --name-only origin/${{ github.event.pull_request.base.ref }} > changed_files.txt
+
       - name: GitHub CLIをセットアップ
         run: |
           sudo apt update && sudo apt install -y gh
