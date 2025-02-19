@@ -10,7 +10,7 @@ try:
         model="gpt-4-turbo",
         messages=[
             {"role": "system", "content": "あなたは優秀なコードレビュワーです。"},
-            {"role": "user", "content": "以下のコードをレビューしてください。\n\n" + open("Operation.php").read()}
+            {"role": "user", "content": "以下のコードをレビューしてください。\n\n" + open("ship_info/src/Entity/Operation.php").read()}
         ]
     )
     review_text = response["choices"][0]["message"]["content"]
