@@ -2,7 +2,11 @@
 __pycache__/
 *.pyc
 .env
+.env.test
+.env.dev
 *.log
 node_modules/
 python/venv/
 ship_info/.env
+ship_info/.env.test
+ship_info/.env.dev
