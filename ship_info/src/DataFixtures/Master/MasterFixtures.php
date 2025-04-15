@@ -36,7 +36,7 @@ class MasterFixtures extends Fixture
         $route2 = new Route();
         $route2->setName("徳之島 ⇔ 鹿児島");
         $route2->setCompany($company2);
-        $route2->setDirection("下り");
+        $route2->setDirection("上り");
         $route2->setCreatedAt(new \DateTimeImmutable());
         $route2->setUpdatedAt(new \DateTimeImmutable());
         $manager->persist($route2);
