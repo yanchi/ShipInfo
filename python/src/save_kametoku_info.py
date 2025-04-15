@@ -48,7 +48,7 @@ def save_kametoku_info():
                         route_id, operation_date, status, status_text, arrival_time, departure_time, memo, created_at, updated_at
                     )
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    ON DUPLICATE KEY UPDATE updated_at = VALUES(updated_at), status = VALUES(status), status_text = VALUES(status_text)
+                    ON DUPLICATE KEY UPDATE status = VALUES(status), status_text = VALUES(status_text)
                 """, (
                     route_id,
                     datetime.strptime(f"{datetime.now().year}年" + entry["運航日"], "%Y年%m月%d日").strftime("%Y-%m-%d"),
