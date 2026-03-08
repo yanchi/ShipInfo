@@ -7,9 +7,8 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OperationRepository::class)]
-#[ORM\Table(name: "operations", uniqueConstraints: [
-    new ORM\UniqueConstraint(name: "unique_route_date", columns: ["route_id", "operation_date"])
-])]
+#[ORM\Table(name: "operations")]
+#[ORM\UniqueConstraint(name: "unique_route_date", columns: ["route_id", "operation_date"])]
 class Operation
 {
     #[ORM\Id]

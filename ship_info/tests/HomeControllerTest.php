@@ -18,8 +18,20 @@ class HomeControllerTest extends WebTestCase
     public function testHomePageShowsNoDataMessageWhenEmpty(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/');
-        $this->assertSelectorTextContains('p', '現在、運航情報はありません。');
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+
+        $companies = $em->getRepository(\App\Entity\Company::class)->findAll();
+        foreach ($companies as $company) {
+            $em->remove($company);
+        }
+        $em->flush();
+
+        try {
+            $client->request('GET', '/');
+            $this->assertSelectorTextContains('p', '現在、運航情報はありません。');
+        } finally {
+            $em->clear();
+        }
     }
 
     public function testHomePageDisplaysCompanyAndFallbackStatus(): void

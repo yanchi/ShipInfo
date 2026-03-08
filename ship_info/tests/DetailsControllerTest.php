@@ -31,7 +31,7 @@ class DetailsControllerTest extends WebTestCase
         $client = static::createClient();
         $this->mockClock('2025-02-12');
         $client->request('GET', '/details/today');
-        $this->assertSelectorTextContains('p', '本日の運航情報はありません。');
+        $this->assertSelectorTextContains('p', 'この航路には本日の運航情報がありません。');
     }
 
     public function testDetailsPageFiltersOperationsByDate(): void
