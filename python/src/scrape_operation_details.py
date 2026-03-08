@@ -1,3 +1,4 @@
+import logging
 import requests  # type: ignore
 from bs4 import BeautifulSoup  # type: ignore
 from get_latest_status_urls import get_latest_status_urls  # URL取得用の関数をインポート
@@ -17,7 +18,8 @@ def get_kametoku_info(soup, direction):
         status_detail = service.select_one("div.status").get_text(strip=True)
         departure_time = service.select_one("div.departure span.time").get_text(strip=True)
         arrival_time = service.select_one("div.entry span.time").get_text(strip=True)
-        memo = service.select_one("div.exp").get_text(strip=True) if service.select_one("div.exp") else "N/A"
+        exp = service.select_one("div.exp")
+        memo = exp.get_text(strip=True) if exp else "N/A"
 
         kametoku_info.append({
             "運航日": departure_date,
@@ -32,7 +34,7 @@ def get_kametoku_info(soup, direction):
 
 # サイトからHTMLデータを取得
 def fetch_html(url):
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     response.raise_for_status()  # ステータスコードがエラーの場合、例外を発生
     return response.text
 
@@ -50,7 +52,7 @@ def scrape_data():
 
     all_kametoku_data = []
     for url in urls:
-        print(f"Fetching data from: {url}")
+        logging.info(f"Fetching data from: {url}")
         try:
             html_content = fetch_html(url)
             soup = BeautifulSoup(html_content, "html.parser")
@@ -60,7 +62,7 @@ def scrape_data():
             if kametoku_data:
                 all_kametoku_data.extend(kametoku_data)
             else:
-                print("亀徳港のデータは見つかりませんでした。")
+                logging.warning("亀徳港のデータは見つかりませんでした。")
         except Exception as e:
-            print(f"エラーが発生しました: {e}")
+            logging.error(f"エラーが発生しました: {e}")
     return all_kametoku_data

@@ -1,3 +1,4 @@
+import logging
 import requests # type: ignore
 from bs4 import BeautifulSoup # type: ignore
 import os
@@ -19,11 +20,11 @@ def get_latest_status_urls():
         if latest_status_section:
             return [link["href"] for link in latest_status_section.select("a.status_single")]
         else:
-            print("Error: No latest status section found.")
+            logging.error("Error: No latest status section found.")
     except requests.RequestException as e:
-        print(f"HTTP Request failed: {e}")
+        logging.error(f"HTTP Request failed: {e}")
     return []
 
 if __name__ == "__main__":
     urls = get_latest_status_urls()
-    print(urls)
+    logging.info(urls)

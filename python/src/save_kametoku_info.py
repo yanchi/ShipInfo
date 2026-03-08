@@ -1,76 +1,68 @@
-import mysql.connector # type: ignore
-from scrape_operation_details import scrape_data  # スクレイピング処理を呼び出し
+import logging
+from scrape_operation_details import scrape_data
 from datetime import datetime
-import os
+from db import get_connection, get_company_id, get_route_id, upsert_operation
 
-# MySQLデータベース接続設定
-DB_CONFIG = {
-    'host': os.getenv("MYSQL_HOST"),
-    'user': os.getenv("MYSQL_USER"),
-    'password': os.getenv("MYSQL_PASSWORD"),
-    'database': os.getenv("MYSQL_DATABASE"),
-}
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+
+
+def _resolve_year(year, month):
+    """現在月より6ヶ月以上先の月は前年と判断して返す。"""
+    now = datetime.now()
+    return year - 1 if month - now.month > 6 else year
+
+
+def _parse_operation_date(year, date_str):
+    """'MM月DD日' を '%Y-%m-%d' に変換。年をまたぐ場合を考慮する。"""
+    dt = datetime.strptime(f"{year}年{date_str}", "%Y年%m月%d日")
+    dt = dt.replace(year=_resolve_year(year, dt.month))
+    return dt.strftime("%Y-%m-%d")
+
+
+def _parse_time(year, date_str, time_str):
+    if not time_str:
+        return None
+    dt = datetime.strptime(f"{year}年{date_str}", "%Y年%m月%d日")
+    dt = dt.replace(year=_resolve_year(year, dt.month))
+    return f"{dt.strftime('%Y-%m-%d')} {time_str}:00"
+
 
 def save_kametoku_info():
-    print("スクレイピングを実行中...")
+    logging.info("スクレイピングを実行中...")
     kametoku_data = scrape_data()
-    print("スクレイピングが完了しました。")
+    logging.info("スクレイピングが完了しました。")
 
-    connection = mysql.connector.connect(**DB_CONFIG)
-    try:
-        cursor = connection.cursor(buffered=True)
+    company_name = "マリックスライン"
+    now = datetime.now()
+    year = now.year
 
-        for entry in kametoku_data:
-            # company_idを取得
-            company_name = "マリックスライン"
-            cursor.execute("SELECT id FROM companies WHERE name = %s", (company_name,))
-            company_id_result = cursor.fetchone()
-            company_id = company_id_result[0] if company_id_result else None
-
+    with get_connection() as connection:
+        with connection.cursor(buffered=True) as cursor:
+            company_id = get_company_id(cursor, company_name)
             if not company_id:
-                print(f"Error: Company '{company_name}' not found.")
-                continue
+                raise ValueError(f"Company '{company_name}' not found.")
 
-            # route_idを取得
-            route_name = entry['方向']
-            cursor.execute("SELECT id FROM routes WHERE direction = %s AND company_id = %s", (route_name, company_id))
-            route_id_result = cursor.fetchone()
-            route_id = route_id_result[0] if route_id_result else None
+            for entry in kametoku_data:
+                route_id = get_route_id(cursor, entry['方向'], company_id)
+                if not route_id:
+                    logging.error(f"Route '{entry['方向']}' not found for company ID {company_id}.")
+                    continue
 
-            if not route_id:
-                print(f"Error: Route '{route_name}' not found for company ID {company_id}.")
-                continue
+                try:
+                    operation_date = _parse_operation_date(year, entry["運航日"])
+                    arrival_time = _parse_time(year, entry["運航日"], entry["到着時刻"])
+                    departure_time = _parse_time(year, entry["運航日"], entry["出発時刻"])
 
-            # operationsテーブルにデータを追加
-            try:
-                cursor.execute("""
-                    INSERT INTO operations (
-                        route_id, operation_date, status, status_text, arrival_time, departure_time, memo, created_at, updated_at
+                    upsert_operation(
+                        cursor, route_id, operation_date,
+                        None, entry["状況詳細"],
+                        arrival_time, departure_time, entry["備考"], now
                     )
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    ON DUPLICATE KEY UPDATE status = VALUES(status), status_text = VALUES(status_text)
-                """, (
-                    route_id,
-                    datetime.strptime(f"{datetime.now().year}年" + entry["運航日"], "%Y年%m月%d日").strftime("%Y-%m-%d"),
-                    None,
-                    entry["状況詳細"],
-                    f"{datetime.strptime(entry['運航日'], '%m月%d日').strftime('%Y-%m-%d')} {entry['到着時刻']}:00" if entry["到着時刻"] else None,
-                    f"{datetime.strptime(entry['運航日'], '%m月%d日').strftime('%Y-%m-%d')} {entry['出発時刻']}:00" if entry["出発時刻"] else None,
-                    entry["備考"],
-                    datetime.now(),
-                    datetime.now()
-                ))
-            except Exception as e:
-                print(f"Error inserting operation: {e}")
+                except Exception as e:
+                    logging.error(f"Error inserting operation: {e}")
 
-        connection.commit()
-        print("データが正常に保存されました。")
-    except mysql.connector.Error as err:
-        print(f"Database error: {err}")
-        connection.rollback()
-    finally:
-        cursor.close()
-        connection.close()
+    logging.info("データが正常に保存されました。")
+
 
 if __name__ == "__main__":
     save_kametoku_info()
