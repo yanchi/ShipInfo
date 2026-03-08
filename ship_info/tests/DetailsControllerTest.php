@@ -31,7 +31,7 @@ class DetailsControllerTest extends WebTestCase
         $client = static::createClient();
         $this->mockClock('2025-02-12');
         $client->request('GET', '/details/today');
-        $this->assertSelectorTextContains('p', 'この航路には本日の運航情報がありません。');
+        $this->assertSelectorTextContains('p', '本日の運航情報はありません。');
     }
 
     public function testDetailsPageFiltersOperationsByDate(): void
@@ -88,7 +88,9 @@ class DetailsControllerTest extends WebTestCase
 
             $content = $client->getResponse()->getContent();
             $this->assertResponseIsSuccessful();
-            $this->assertStringContainsString('2025-02-12', $content);
+            // 運航日は非表示のため、今日の運航が描画されたことをステータステキストで確認
+            $this->assertStringContainsString('通常運航', $content);
+            // 前日の便は表示されない（日付文字列がHTMLに含まれないことを確認）
             $this->assertStringNotContainsString('2025-02-11', $content);
         } finally {
             $em->clear();

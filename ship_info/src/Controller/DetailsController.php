@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use Psr\Clock\ClockInterface;
 use App\Repository\CompanyRepository;
+use App\Repository\OperationRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -19,23 +20,45 @@ class DetailsController extends AbstractController
 
     #[Route('/details/today', name: 'app_details_today')]
     public function index(
-        CompanyRepository $companyRepository
+        CompanyRepository $companyRepository,
+        OperationRepository $operationRepository
     ): Response {
-        // 今日の日付を取得
-        $today = $this->clock->now()->format('Y-m-d'); // 日付だけにフォーマット
+        $today = $this->clock->now()->format('Y-m-d');
 
-        // フェリー会社と紐づく航路と運航情報を取得
+        // 会社・航路を取得（operationsは別クエリで取得してlazy load問題を回避）
         $companies = $companyRepository->createQueryBuilder('c')
             ->leftJoin('c.routes', 'r')
-            ->leftJoin('r.operations', 'o', 'WITH', 'o.operationDate >= :today') // 条件を「本日以降」に変更
-            ->setParameter('today', $today)
             ->addSelect('r')
-            ->addSelect('o')
             ->getQuery()
             ->getResult();
-            
+
+        // 今日の運航情報を出発時刻昇順で取得（routeをJOINしてlazy load回避）
+        $operations = $operationRepository->createQueryBuilder('o')
+            ->join('o.route', 'r')
+            ->addSelect('r')
+            ->where('o.operationDate = :today')
+            ->setParameter('today', $today)
+            ->orderBy('o.departureTime', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        // 航路IDをキーにグループ化（同一route+出発時刻(H:i)の重複を除去）
+        // ※スクレイパーバグで同一時刻が異なる年(1900等)で登録されることへの対応
+        $operationsByRoute = [];
+        foreach ($operations as $operation) {
+            $routeId = $operation->getRoute()->getId();
+            $departureHi = $operation->getDepartureTime()?->format('H:i') ?? 'null';
+            $dedupeKey = $routeId . '_' . $departureHi;
+            if (!isset($operationsByRoute[$routeId][$dedupeKey])) {
+                $operationsByRoute[$routeId][$dedupeKey] = $operation;
+            }
+        }
+        // テンプレート向けに値のみの配列に変換
+        $operationsByRoute = array_map('array_values', $operationsByRoute);
+
         return $this->render('details/index.html.twig', [
             'companies' => $companies,
+            'operationsByRoute' => $operationsByRoute,
         ]);
     }
 }

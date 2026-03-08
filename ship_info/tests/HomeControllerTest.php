@@ -56,6 +56,7 @@ class HomeControllerTest extends WebTestCase
         $em->flush();
 
         $companyId = $company->getId();
+        $em->clear();
 
         try {
             $client->request('GET', '/');
