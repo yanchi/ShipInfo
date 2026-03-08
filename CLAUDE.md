@@ -88,3 +88,10 @@ python save_kametoku_info.py
 - **PHP / Symfony**: ウェブアプリケーション
 - **MySQL 8.0**: データ永続化
 - **Docker / Docker Compose**: ローカル開発環境
+
+## Active Technologies
+- PHP 8.x / Symfony (latest stable) + Twig + Doctrine ORM (QueryBuilder), Twig auto-escape (001-details-ux)
+- MySQL 8.0（読み取り専用。スキーマ変更なし） (001-details-ux)
+
+## Recent Changes
+- 001-details-ux: Added PHP 8.x / Symfony (latest stable) + Twig + Doctrine ORM (QueryBuilder), Twig auto-escape
