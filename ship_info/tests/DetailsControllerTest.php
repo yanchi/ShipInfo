@@ -66,14 +66,14 @@ class DetailsControllerTest extends WebTestCase
             ->setUpdatedAt($now);
         $em->persist($todayOp);
 
-        // 前日(2025-02-11)の運航 → フィルタで除外される
+        // 前日(2025-02-11)の運航 → フィルタで除外される（欠航・異なる時刻で区別可能にする）
         $yesterdayOp = (new Operation())
             ->setRoute($route)
             ->setOperationDate(new \DateTime('2025-02-11'))
-            ->setStatus('normal')
-            ->setStatusText('通常運航')
-            ->setDepartureTime(new \DateTime('2025-02-11 10:00:00'))
-            ->setArrivalTime(new \DateTime('2025-02-11 14:00:00'))
+            ->setStatus('cancelled')
+            ->setStatusText('欠航')
+            ->setDepartureTime(new \DateTime('2025-02-11 09:00:00'))
+            ->setArrivalTime(new \DateTime('2025-02-11 13:00:00'))
             ->setCreatedAt($now)
             ->setUpdatedAt($now);
         $em->persist($yesterdayOp);
@@ -88,10 +88,10 @@ class DetailsControllerTest extends WebTestCase
 
             $content = $client->getResponse()->getContent();
             $this->assertResponseIsSuccessful();
-            // 運航日は非表示のため、今日の運航が描画されたことをステータステキストで確認
+            // 今日の運航が描画されていることをステータステキストで確認
             $this->assertStringContainsString('通常運航', $content);
-            // 前日の便は表示されない（日付文字列がHTMLに含まれないことを確認）
-            $this->assertStringNotContainsString('2025-02-11', $content);
+            // 前日の便（欠航）はフィルタで除外される
+            $this->assertStringNotContainsString('欠航', $content);
         } finally {
             $em->clear();
             $company = $em->find(Company::class, $companyId);

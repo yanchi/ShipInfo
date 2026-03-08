@@ -33,12 +33,18 @@ class HomeController extends AbstractController
 
         $latestByRoute = [];
         if ($routeIds) {
+            // 各航路の最新operationDateのみをDB側で取得（サブクエリでバインド不要）
+            $subQb = $operationRepository->createQueryBuilder('o2')
+                ->select('MAX(o2.operationDate)')
+                ->where('o2.route = o.route');
+
             $ops = $operationRepository->createQueryBuilder('o')
                 ->join('o.route', 'r')
                 ->addSelect('r')
                 ->where('o.route IN (:ids)')
                 ->setParameter('ids', $routeIds)
-                ->orderBy('o.operationDate', 'DESC')
+                ->andWhere('o.operationDate = (' . $subQb->getDQL() . ')')
+                ->orderBy('o.id', 'DESC') // 同一route+dateの重複はIDが新しい方を優先
                 ->getQuery()
                 ->getResult();
 
@@ -58,8 +64,8 @@ class HomeController extends AbstractController
                 $operation = $latestByRoute[$route->getId()] ?? null;
                 $routeData[] = [
                     'name' => $route->getName(),
-                    'status' => $operation ? $operation->getStatus() : 'normal',
-                    'status_text' => $operation ? $operation->getStatusText() : '通常運航',
+                    'status' => ($operation?->getStatus()) ?: 'normal',
+                    'status_text' => ($operation?->getStatusText()) ?: '通常運航',
                 ];
             }
             $shipData[] = [

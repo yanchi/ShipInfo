@@ -49,7 +49,9 @@ class DetailsController extends AbstractController
             $routeId = $operation->getRoute()->getId();
             $departureHi = $operation->getDepartureTime()?->format('H:i') ?? 'null';
             $dedupeKey = $routeId . '_' . $departureHi;
-            if (!isset($operationsByRoute[$routeId][$dedupeKey])) {
+            $existing = $operationsByRoute[$routeId][$dedupeKey] ?? null;
+            // 同H:i重複時は年が新しい（正しい）レコードを優先 ※年1900スクレイパーバグ対応
+            if ($existing === null || $operation->getDepartureTime() > $existing->getDepartureTime()) {
                 $operationsByRoute[$routeId][$dedupeKey] = $operation;
             }
         }

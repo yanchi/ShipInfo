@@ -26,7 +26,8 @@
                                     {% if routeOps is not empty %}
                                         {% for operation in routeOps %}
                                             <div class="operation-details">
-                                                <span class="status {{ operation.status }}">{{ operation.getStatusText() }}</span>
+                                                {% set statusClass = operation.status in ['normal', 'delayed', 'cancelled', 'suspend'] ? operation.status : 'normal' %}
+                                                <span class="status {{ statusClass }}">{{ operation.getStatusText() ?? '通常運航' }}</span>
                                                 {% if operation.departureTime %}
                                                     <p>出発 {{ operation.departureTime|date('H:i') }}</p>
                                                 {% endif %}
