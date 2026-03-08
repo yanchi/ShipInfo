@@ -3,7 +3,7 @@
 **Input**: Design documents from `/specs/001-details-ux/`
 **Prerequisites**: plan.md ✅, spec.md ✅, research.md ✅, data-model.md ✅
 
-**Tests**: 本フィーチャーに自動テストは含まない（spec.md に明示なし）。各フェーズの Checkpoint で手動検証を行う。
+**Tests**: 本フィーチャーで新規の自動テストは追加しないが、既存の PHPUnit テスト（DetailsControllerTest / HomeControllerTest）の更新は含む（spec.md に明示なし）。各フェーズの Checkpoint で手動検証を行う。
 
 **Organization**: タスクはユーザーストーリー単位でグループ化し、独立した実装・検証を可能にする。
 
