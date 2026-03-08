@@ -15,10 +15,11 @@ ShipInfoは、フェリー運航情報を収集し、効率的に管理・提供
 ## 📦 プロジェクト構成
 
 ShipInfo/
-├── python/                  # Pythonで実装されたスクレイピングおよびデータ保存コード
-│   ├── get_latest_status_urls.py  # 運航情報取得用のURLを収集
-│   ├── scrape_operation_details.py  # 運航情報のスクレイピング処理
-│   ├── save_kametoku_info.py  # スクレイピングしたデータをDBに保存
+├── python/src/              # Pythonで実装されたスクレイピングおよびデータ保存コード
+│   ├── scraper.py                     # スクレイピング共通処理
+│   ├── get_latest_status_urls.py      # 運航情報取得用のURLを収集
+│   ├── scrape_operation_details.py    # 運航情報のスクレイピング処理
+│   └── save_kametoku_info.py          # スクレイピングしたデータをDBに保存
 ├── ship_info/               # Symfonyによるウェブアプリケーション
 │   ├── .env                 # 環境変数（本番環境用はVPSで生成）
 │   ├── config/              # Symfonyの設定ファイル
@@ -35,7 +36,7 @@ ShipInfo/
 ### **1. 必要なツール**
 
 - DockerおよびDocker Compose
-- Python 3.9以上
+- Python 3.12以上
 - Composer（Symfonyの依存ライブラリ管理ツール）
 
 ### **2. クローンリポジトリ**
@@ -69,7 +70,7 @@ docker-compose up -d
 
 1. Pythonスクリプトでデータを収集します。
 
-cd python
+cd python/src
 python save_kametoku_info.py
 
 2. スクリプトを定期実行するには、`cron` または `task scheduler` を利用してください。
@@ -81,7 +82,7 @@ python save_kametoku_info.py
 1. アプリケーションにアクセスします。
 
 - 開発環境では以下のURLからアクセスできます：
-  http://localhost
+  http://localhost:8080
 
 2. フェリー運航情報を閲覧または検索。
 
