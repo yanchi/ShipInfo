@@ -26,8 +26,12 @@
                                     {% if routeOps is not empty %}
                                         {% for operation in routeOps %}
                                             <div class="operation-details">
-                                                {% set statusClass = operation.status in ['normal', 'delayed', 'cancelled', 'suspend'] ? operation.status : 'normal' %}
-                                                <span class="status {{ statusClass }}">{{ operation.getStatusText() ?? '通常運航' }}</span>
+                                                {% set statusClasses = operation.getStatus() ?? [] %}
+                                                {% set statusTexts = operation.getStatusText() ?? [] %}
+                                                {% for key, statusText in (statusTexts is not empty ? statusTexts : ['通常運航']) %}
+                                                    {% set statusClass = statusClasses[key] ?? '' %}
+                                                    <span class="status {{ statusClass ?: 'normal' }}">{{ statusText }}</span>
+                                                {% endfor %}
                                                 {% if operation.departureTime %}
                                                     <p>出発 {{ operation.departureTime|date('H:i') }}</p>
                                                 {% endif %}

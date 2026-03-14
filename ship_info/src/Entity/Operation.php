@@ -23,11 +23,11 @@ class Operation
     #[ORM\Column(name: "operation_date", type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $operationDate = null;
 
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $status = null;
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $status = null;
 
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $status_text = null;
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $status_text = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $arrivalTime = null;
@@ -73,24 +73,24 @@ class Operation
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): ?array
     {
         return $this->status;
     }
 
-    public function setStatus(?string $status): static
+    public function setStatus(?array $status): static
     {
         $this->status = $status;
 
         return $this;
     }
 
-    public function getStatusText(): ?string
+    public function getStatusText(): ?array
     {
         return $this->status_text;
     }
 
-    public function setStatusText(?string $status_text): static
+    public function setStatusText(?array $status_text): static
     {
         $this->status_text = $status_text;
 

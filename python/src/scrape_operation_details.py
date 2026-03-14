@@ -3,6 +3,8 @@ import requests  # type: ignore
 from bs4 import BeautifulSoup  # type: ignore
 from get_latest_status_urls import get_latest_status_urls  # URL取得用の関数をインポート
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+
 # 亀徳港の情報を抽出する関数（解析処理）
 def get_kametoku_info(soup, direction):
     services = soup.find_all("div", class_="single")
@@ -13,11 +15,28 @@ def get_kametoku_info(soup, direction):
         if not (port_name_tag and "亀徳港" in port_name_tag.get_text(strip=True)):
             continue
 
-        # 各データを一度だけ抽出
-        departure_date = service.select_one("div.departure span.date").get_text(strip=True)
-        status_detail = service.select_one("div.status").get_text(strip=True)
-        departure_time = service.select_one("div.departure span.time").get_text(strip=True)
-        arrival_time = service.select_one("div.entry span.time").get_text(strip=True)
+        # 各データを一度だけ抽出（要素が存在しない場合はスキップ）
+        date_tag = service.select_one("div.departure span.date")
+        if not date_tag:
+            logging.warning("div.departure span.date が見つかりません。スキップします。")
+            continue
+        departure_date = date_tag.get_text(strip=True)
+
+        status_detail = [div.get_text(strip=True) for div in service.select("div.status")]
+
+        if not status_detail:
+            logging.warning("div.status が見つかりません。スキップします。")
+            continue
+
+        # 「―」のみの場合は寄港なしのためスキップ
+        if status_detail == ["―"]:
+            continue
+
+        departure_time_tag = service.select_one("div.departure span.time")
+        arrival_time_tag = service.select_one("div.entry span.time")
+        departure_time = departure_time_tag.get_text(strip=True) if departure_time_tag else None
+        arrival_time = arrival_time_tag.get_text(strip=True) if arrival_time_tag else None
+
         exp = service.select_one("div.exp")
         memo = exp.get_text(strip=True) if exp else "N/A"
 
@@ -43,7 +62,10 @@ def parse_direction_from_h1(soup):
     h1_tag = soup.find("h1")
     if h1_tag:
         h1_text = h1_tag.get_text(strip=True)
-        return "下り" if "下り便" in h1_text else "上り"
+        if "下り便" in h1_text:
+            return "下り"
+        if "上り便" in h1_text:
+            return "上り"
     return "N/A"
 
 # 全スクレイピング処理の実行
@@ -57,12 +79,17 @@ def scrape_data():
             html_content = fetch_html(url)
             soup = BeautifulSoup(html_content, "html.parser")
             direction = parse_direction_from_h1(soup)
+            if direction == "N/A":
+                logging.warning(f"h1 から方向を特定できませんでした。スキップします: {url}")
+                continue
             kametoku_data = get_kametoku_info(soup, direction)
 
             if kametoku_data:
                 all_kametoku_data.extend(kametoku_data)
             else:
                 logging.warning("亀徳港のデータは見つかりませんでした。")
+        except requests.RequestException as e:
+            logging.error(f"HTTP エラーが発生しました: {e}")
         except Exception as e:
-            logging.error(f"エラーが発生しました: {e}")
+            logging.error(f"予期しないエラーが発生しました: {e}", exc_info=True)
     return all_kametoku_data

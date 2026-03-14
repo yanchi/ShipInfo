@@ -43,9 +43,9 @@ class TestResolveYear:
             assert _resolve_year(2025, 8) == 2024
 
     def test_same_year_in_december_to_january_transition(self):
-        """現在12月 → 翌1月 (差=-11) は同年扱い"""
+        """現在12月 → 翌1月 (差=-11) は翌年扱い"""
         with patch(PATCH_TARGET, _mock_now(12)):
-            assert _resolve_year(2025, 1) == 2025
+            assert _resolve_year(2025, 1) == 2026
 
     def test_boundary_exact_7_months_ahead_is_previous_year(self):
         """現在1月 → 8月 (差=7 > 6) → 前年"""

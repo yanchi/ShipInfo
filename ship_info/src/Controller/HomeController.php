@@ -33,21 +33,7 @@ class HomeController extends AbstractController
 
         $latestByRoute = [];
         if ($routeIds) {
-            // 各航路の最新operationDateのみをDB側で取得（サブクエリでバインド不要）
-            $subQb = $operationRepository->createQueryBuilder('o2')
-                ->select('MAX(o2.operationDate)')
-                ->where('o2.route = o.route');
-
-            $ops = $operationRepository->createQueryBuilder('o')
-                ->join('o.route', 'r')
-                ->addSelect('r')
-                ->where('o.route IN (:ids)')
-                ->setParameter('ids', $routeIds)
-                ->andWhere('o.operationDate = (' . $subQb->getDQL() . ')')
-                ->orderBy('o.id', 'DESC') // 同一route+dateの重複はIDが新しい方を優先
-                ->getQuery()
-                ->getResult();
-
+            $ops = $operationRepository->findLatestByRouteIds($routeIds);
             foreach ($ops as $op) {
                 $rid = $op->getRoute()->getId();
                 if (!isset($latestByRoute[$rid])) {
@@ -62,10 +48,15 @@ class HomeController extends AbstractController
             $routeData = [];
             foreach ($company->getRoutes() as $route) {
                 $operation = $latestByRoute[$route->getId()] ?? null;
+                $statusClasses = $operation?->getStatus() ?? [];
+                $statusTexts = $operation?->getStatusText() ?: ['通常運航'];
+                $statuses = [];
+                foreach ($statusTexts as $i => $text) {
+                    $statuses[] = ['class' => $statusClasses[$i] ?? '', 'text' => $text];
+                }
                 $routeData[] = [
                     'name' => $route->getName(),
-                    'status' => ($operation?->getStatus()) ?: 'normal',
-                    'status_text' => ($operation?->getStatusText()) ?: '通常運航',
+                    'statuses' => $statuses,
                 ];
             }
             $shipData[] = [

@@ -58,8 +58,8 @@ class DetailsControllerTest extends WebTestCase
         $todayOp = (new Operation())
             ->setRoute($route)
             ->setOperationDate(new \DateTime('2025-02-12'))
-            ->setStatus('normal')
-            ->setStatusText('通常運航')
+            ->setStatus(['normal'])
+            ->setStatusText(['通常運航'])
             ->setDepartureTime(new \DateTime('2025-02-12 10:00:00'))
             ->setArrivalTime(new \DateTime('2025-02-12 14:00:00'))
             ->setCreatedAt($now)
@@ -70,8 +70,8 @@ class DetailsControllerTest extends WebTestCase
         $yesterdayOp = (new Operation())
             ->setRoute($route)
             ->setOperationDate(new \DateTime('2025-02-11'))
-            ->setStatus('cancelled')
-            ->setStatusText('欠航')
+            ->setStatus(['cancelled'])
+            ->setStatusText(['欠航'])
             ->setDepartureTime(new \DateTime('2025-02-11 09:00:00'))
             ->setArrivalTime(new \DateTime('2025-02-11 13:00:00'))
             ->setCreatedAt($now)
@@ -125,8 +125,8 @@ class DetailsControllerTest extends WebTestCase
         $laterOp = (new Operation())
             ->setRoute($route)
             ->setOperationDate(new \DateTime('2025-02-12'))
-            ->setStatus('normal')
-            ->setStatusText('通常運航')
+            ->setStatus(['normal'])
+            ->setStatusText(['通常運航'])
             ->setDepartureTime(new \DateTime('2025-02-12 14:00:00'))
             ->setCreatedAt($now)
             ->setUpdatedAt($now);
@@ -135,8 +135,8 @@ class DetailsControllerTest extends WebTestCase
         $earlierOp = (new Operation())
             ->setRoute($route)
             ->setOperationDate(new \DateTime('2025-02-12'))
-            ->setStatus('normal')
-            ->setStatusText('通常運航')
+            ->setStatus(['normal'])
+            ->setStatusText(['通常運航'])
             ->setDepartureTime(new \DateTime('2025-02-12 08:00:00'))
             ->setCreatedAt($now)
             ->setUpdatedAt($now);
@@ -153,6 +153,8 @@ class DetailsControllerTest extends WebTestCase
             $content = $client->getResponse()->getContent();
             $this->assertResponseIsSuccessful();
             // 08:00 が 14:00 より前に出現する
+            $this->assertStringContainsString('08:00', $content, '08:00 が表示されていない');
+            $this->assertStringContainsString('14:00', $content, '14:00 が表示されていない');
             $this->assertLessThan(
                 strpos($content, '14:00'),
                 strpos($content, '08:00'),
@@ -191,8 +193,8 @@ class DetailsControllerTest extends WebTestCase
         $correctOp = (new Operation())
             ->setRoute($route)
             ->setOperationDate(new \DateTime('2025-02-12'))
-            ->setStatus('normal')
-            ->setStatusText('通常運航')
+            ->setStatus(['normal'])
+            ->setStatusText(['通常運航'])
             ->setDepartureTime(new \DateTime('2025-02-12 10:00:00'))
             ->setCreatedAt($now)
             ->setUpdatedAt($now);
@@ -202,8 +204,8 @@ class DetailsControllerTest extends WebTestCase
         $buggedOp = (new Operation())
             ->setRoute($route)
             ->setOperationDate(new \DateTime('2025-02-12'))
-            ->setStatus('normal')
-            ->setStatusText('通常運航')
+            ->setStatus(['normal'])
+            ->setStatusText(['通常運航'])
             ->setDepartureTime(new \DateTime('1900-02-12 10:00:00'))
             ->setCreatedAt($now)
             ->setUpdatedAt($now);
