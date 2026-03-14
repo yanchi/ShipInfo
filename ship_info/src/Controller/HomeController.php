@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Repository\CompanyRepository;
 use App\Repository\OperationRepository;
+use Doctrine\DBAL\Types\Types;
 use Psr\Clock\ClockInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -22,7 +23,7 @@ class HomeController extends AbstractController
         CompanyRepository $companyRepository,
         OperationRepository $operationRepository
     ): Response {
-        $today = $this->clock->now()->format('Y-m-d');
+        $today = \DateTimeImmutable::createFromInterface($this->clock->now())->setTime(0, 0, 0);
 
         // 会社と航路を1クエリで取得
         $companies = $companyRepository->createQueryBuilder('c')
@@ -48,7 +49,7 @@ class HomeController extends AbstractController
                 ->where('o.route IN (:ids)')
                 ->andWhere('o.operationDate = :today')
                 ->setParameter('ids', $routeIds)
-                ->setParameter('today', $today)
+                ->setParameter('today', $today, Types::DATE_MUTABLE)
                 ->getQuery()
                 ->getResult();
             foreach ($ops as $op) {

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use Doctrine\DBAL\Types\Types;
 use Psr\Clock\ClockInterface;
 use App\Repository\CompanyRepository;
 use App\Repository\OperationRepository;
@@ -24,7 +25,7 @@ class DetailsController extends AbstractController
         CompanyRepository $companyRepository,
         OperationRepository $operationRepository
     ): Response {
-        $today = $this->clock->now()->format('Y-m-d');
+        $today = \DateTimeImmutable::createFromInterface($this->clock->now())->setTime(0, 0, 0);
 
         // 会社・航路を取得（operationsは別クエリで取得してlazy load問題を回避）
         $companies = $companyRepository->createQueryBuilder('c')
@@ -38,7 +39,7 @@ class DetailsController extends AbstractController
             ->join('o.route', 'r')
             ->addSelect('r')
             ->where('o.operationDate = :today')
-            ->setParameter('today', $today)
+            ->setParameter('today', $today, Types::DATE_MUTABLE)
             ->orderBy('o.departureTime', 'ASC')
             ->getQuery()
             ->getResult();

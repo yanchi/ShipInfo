@@ -19,7 +19,7 @@ class OperationDeduplicator
         $operationsByRoute = [];
         foreach ($operations as $operation) {
             $routeId = $operation->getRoute()->getId();
-            // 出発時刻なしは航路あたり1件のみ想定（欠航・通常運航）。複数ある場合は後勝ち。
+            // 出発時刻なしは航路あたり1件のみ想定（欠航・通常運航）。複数ある場合は先勝ち。
             $departureHi = $operation->getDepartureTime()?->format('H:i') ?? 'null';
             $dedupeKey = $routeId . '_' . $departureHi;
             $existing = $operationsByRoute[$routeId][$dedupeKey] ?? null;
