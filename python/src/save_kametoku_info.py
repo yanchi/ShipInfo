@@ -1,5 +1,12 @@
 import logging
 from scrape_operation_details import scrape_data
+
+_STATUS_CLASS_MAP = {
+    "通常運航": "normal",
+    "欠航": "cancelled",
+    "条件付運航": "tag-conditionally",
+    "遅延": "delayed",
+}
 from datetime import datetime
 from db import get_connection, get_company_id, get_route_id, upsert_operation
 
@@ -53,9 +60,11 @@ def save_kametoku_info():
                     arrival_time = _parse_time(year, entry["運航日"], entry["到着時刻"])
                     departure_time = _parse_time(year, entry["運航日"], entry["出発時刻"])
 
+                    status_texts = entry["状況詳細"]
+                    status_classes = [_STATUS_CLASS_MAP.get(t, "normal") for t in status_texts]
                     upsert_operation(
                         cursor, route_id, operation_date,
-                        None, entry["状況詳細"],
+                        status_classes, status_texts,
                         arrival_time, departure_time, entry["備考"], now
                     )
                 except Exception as e:

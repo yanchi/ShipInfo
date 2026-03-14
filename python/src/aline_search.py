@@ -69,16 +69,18 @@ def fetch_results():
                 tag_list = box.find('div', class_='tag-list')
                 if not tag_list:
                     continue
-                for span in tag_list.find_all('span'):
-                    results.append({
-                        '乗船日': ship_date,
-                        '乗船港': start_port,
-                        '下船港': end_port,
-                        '乗船日時': cols[2].text.strip(),
-                        '下船日時': cols[3].text.strip(),
-                        'Class': ", ".join(span.get('class', [])),
-                        'Text': span.text.strip(),
-                    })
+                spans = tag_list.find_all('span')
+                if not spans:
+                    continue
+                results.append({
+                    '乗船日': ship_date,
+                    '乗船港': start_port,
+                    '下船港': end_port,
+                    '乗船日時': cols[2].text.strip(),
+                    '下船日時': cols[3].text.strip(),
+                    'Classes': [" ".join(span.get('class', [])) for span in spans],
+                    'Texts': [span.text.strip() for span in spans],
+                })
     return results
 
 
@@ -109,7 +111,7 @@ def fetch_and_save_data():
 
                     upsert_operation(
                         cursor, route_id, operation_date,
-                        result['Class'], result['Text'],
+                        result['Classes'], result['Texts'],
                         arrival_time, departure_time, None, now
                     )
                 except Exception as e:

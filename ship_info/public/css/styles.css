@@ -98,6 +98,16 @@ h2 {
     color: #383d41;
 }
 
+.status.tag-port {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.status.tag-conditionally {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
 .route-direction {
     font-size: 0.85em;
     color: #666;

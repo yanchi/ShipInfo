@@ -12,7 +12,11 @@
                 <h3>{{ ship.name }}</h3>
                 <ul>
                 {% for route in ship.routes %}
-                <li>{{ route.name }}: <span class="status {{ route.status }}">{{ route.status_text }}</span> </li>
+                <li>{{ route.name }}:
+                    {% for s in route.statuses %}
+                        <span class="status {{ s.class ?: 'normal' }}">{{ s.text }}</span>
+                    {% endfor %}
+                </li>
                 {% endfor %}
                 </ul>
             </div>

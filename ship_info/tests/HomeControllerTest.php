@@ -58,8 +58,8 @@ class HomeControllerTest extends WebTestCase
         $olderOp = (new Operation())
             ->setRoute($route)
             ->setOperationDate(new \DateTime('2025-02-10'))
-            ->setStatus('cancelled')
-            ->setStatusText('欠航')
+            ->setStatus(['cancelled'])
+            ->setStatusText(['欠航'])
             ->setCreatedAt($now)
             ->setUpdatedAt($now);
         $em->persist($olderOp);
@@ -68,8 +68,8 @@ class HomeControllerTest extends WebTestCase
         $newerOp = (new Operation())
             ->setRoute($route)
             ->setOperationDate(new \DateTime('2025-02-12'))
-            ->setStatus('normal')
-            ->setStatusText('通常運航')
+            ->setStatus(['normal'])
+            ->setStatusText(['通常運航'])
             ->setCreatedAt($now)
             ->setUpdatedAt($now);
         $em->persist($newerOp);

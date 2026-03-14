@@ -15,7 +15,12 @@ def get_kametoku_info(soup, direction):
 
         # 各データを一度だけ抽出
         departure_date = service.select_one("div.departure span.date").get_text(strip=True)
-        status_detail = service.select_one("div.status").get_text(strip=True)
+        status_detail = [div.get_text(strip=True) for div in service.select("div.status")]
+
+        # 「―」のみの場合は寄港なしのためスキップ
+        if status_detail == ["―"]:
+            continue
+
         departure_time = service.select_one("div.departure span.time").get_text(strip=True)
         arrival_time = service.select_one("div.entry span.time").get_text(strip=True)
         exp = service.select_one("div.exp")
