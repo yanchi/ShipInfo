@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from db import get_connection, get_company_id, get_route_id, upsert_operation
 from notifier import send_alert
@@ -74,8 +74,12 @@ def save_kametoku_info():
 
                 try:
                     operation_date = _parse_operation_date(year, entry["運航日"])
-                    arrival_time = _parse_time(year, entry["運航日"], entry["到着時刻"])
                     departure_time = _parse_time(year, entry["運航日"], entry["出発時刻"])
+                    if departure_time:
+                        delta = timedelta(hours=9, minutes=20) if entry["方向"] == "下り" else timedelta(hours=16)
+                        arrival_time = (datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S") + delta).strftime("%Y-%m-%d %H:%M:%S")
+                    else:
+                        arrival_time = None
 
                     status_texts = entry["状況詳細"]
                     status_classes = []

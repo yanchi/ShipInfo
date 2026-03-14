@@ -5,6 +5,7 @@ namespace App\Controller;
 use Psr\Clock\ClockInterface;
 use App\Repository\CompanyRepository;
 use App\Repository\OperationRepository;
+use App\Service\OperationDeduplicator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,6 +15,7 @@ class DetailsController extends AbstractController
 {
     public function __construct(
         private readonly ClockInterface $clock,
+        private readonly OperationDeduplicator $deduplicator,
         #[Autowire(param: 'app.company_urls')] private readonly array $companyUrls,
     ) {}
 
@@ -41,27 +43,9 @@ class DetailsController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        // 航路IDをキーにグループ化（同一route+出発時刻(H:i)の重複を除去）
-        // ※スクレイパーバグで同一時刻が異なる年(1900等)で登録されることへの対応
-        $operationsByRoute = [];
-        foreach ($operations as $operation) {
-            $routeId = $operation->getRoute()->getId();
-            $departureHi = $operation->getDepartureTime()?->format('H:i') ?? 'null';
-            $dedupeKey = $routeId . '_' . $departureHi;
-            $existing = $operationsByRoute[$routeId][$dedupeKey] ?? null;
-            // 同H:i重複時は年が新しい（正しい）レコードを優先 ※年1900スクレイパーバグ対応
-            $opTime = $operation->getDepartureTime();
-            $exTime = $existing?->getDepartureTime();
-            if ($existing === null || ($opTime !== null && ($exTime === null || $opTime > $exTime))) {
-                $operationsByRoute[$routeId][$dedupeKey] = $operation;
-            }
-        }
-        // テンプレート向けに値のみの配列に変換
-        $operationsByRoute = array_map('array_values', $operationsByRoute);
-
         return $this->render('details/index.html.twig', [
             'companies' => $companies,
-            'operationsByRoute' => $operationsByRoute,
+            'operationsByRoute' => $this->deduplicator->groupByRoute($operations),
             'companyUrls' => $this->companyUrls,
         ]);
     }

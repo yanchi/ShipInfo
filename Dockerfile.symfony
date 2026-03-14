@@ -10,6 +10,9 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install \
     intl pdo pdo_mysql
 
+# タイムゾーン設定
+RUN echo "date.timezone = Asia/Tokyo" > /usr/local/etc/php/conf.d/timezone.ini
+
 # Composerのインストール
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -25,10 +28,11 @@ RUN a2ensite 000-default.conf
 RUN a2enmod rewrite
 
 # Symfonyが.envを要求するので最小限のものを作成（実際の値はdocker-composeの環境変数で上書き）
-RUN echo "APP_ENV=prod\nAPP_SECRET=placeholder" > /var/www/html/.env
+RUN printf "APP_ENV=prod\nAPP_SECRET=placeholder\n" > /var/www/html/.env
 
-# 依存関係インストール
-RUN APP_ENV=prod composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+# 依存関係インストール & キャッシュウォームアップ
+RUN APP_ENV=prod composer install --no-dev --optimize-autoloader --no-interaction \
+    && APP_ENV=prod php bin/console cache:warmup --env=prod
 
 # 必要なディレクトリの権限を設定
 RUN mkdir -p /var/www/html/var/cache/prod /var/www/html/var/log \

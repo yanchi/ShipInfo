@@ -27,7 +27,7 @@ class Operation
     private ?array $status = null;
 
     #[ORM\Column(type: Types::JSON, nullable: true)]
-    private ?array $status_text = null;
+    private ?array $statusText = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $arrivalTime = null;
@@ -87,12 +87,12 @@ class Operation
 
     public function getStatusText(): ?array
     {
-        return $this->status_text;
+        return $this->statusText;
     }
 
-    public function setStatusText(?array $status_text): static
+    public function setStatusText(?array $statusText): static
     {
-        $this->status_text = $status_text;
+        $this->statusText = $statusText;
 
         return $this;
     }

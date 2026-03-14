@@ -40,6 +40,9 @@ class HomeControllerTest extends IntegrationTestCase
         $em = static::getContainer()->get('doctrine.orm.entity_manager');
 
         $now = new \DateTimeImmutable();
+        $today = '2025-02-12';
+        $this->mockClock($today);
+
         $company = (new Company())
             ->setName('最新便テスト運輸')
             ->setCreatedAt($now)
@@ -53,7 +56,7 @@ class HomeControllerTest extends IntegrationTestCase
             ->setUpdatedAt($now);
         $em->persist($route);
 
-        // 古い日付の運航（欠航）→ 表示されないはず
+        // 古い日付の運航（欠航）→ 今日ではないので表示されないはず
         $olderOp = (new Operation())
             ->setRoute($route)
             ->setOperationDate(new \DateTime('2025-02-10'))
@@ -63,10 +66,10 @@ class HomeControllerTest extends IntegrationTestCase
             ->setUpdatedAt($now);
         $em->persist($olderOp);
 
-        // 新しい日付の運航（通常）→ こちらが表示される
+        // 今日の運航（通常）→ こちらが表示される
         $newerOp = (new Operation())
             ->setRoute($route)
-            ->setOperationDate(new \DateTime('2025-02-12'))
+            ->setOperationDate(new \DateTime($today))
             ->setStatus(['normal'])
             ->setStatusText(['通常運航'])
             ->setCreatedAt($now)
@@ -82,7 +85,7 @@ class HomeControllerTest extends IntegrationTestCase
             $content = $client->getResponse()->getContent();
 
             $this->assertResponseIsSuccessful();
-            // 最新日付（2025-02-12）の通常運航が表示される
+            // 今日（2025-02-12）の通常運航が表示される
             $this->assertStringContainsString('通常運航', $content);
             // 古い日付（2025-02-10）の欠航は表示されない
             $this->assertStringNotContainsString('欠航', $content);
@@ -122,8 +125,8 @@ class HomeControllerTest extends IntegrationTestCase
             $this->assertResponseIsSuccessful();
             $this->assertStringContainsString('テスト運輸', $content);
             $this->assertStringContainsString('那覇 ⇔ 鹿児島', $content);
-            // operationがない場合、フォールバック値が表示される
-            $this->assertStringContainsString('通常運航', $content);
+            // operationがない場合、「運航予定なし」が表示される
+            $this->assertStringContainsString('運航予定なし', $content);
         } finally {
             $this->cleanupEntity($em, Company::class, $companyId);
         }

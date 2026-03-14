@@ -8,7 +8,8 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       MARIXLINE_SERVICE_URL: ${MARIXLINE_SERVICE_URL}
       MYSQL_HOST: ${MYSQL_HOST}
@@ -41,7 +42,8 @@ services:
       MAILER_DSN: ${MAILER_DSN:-null://null}
       APP_SECRET: ${APP_SECRET}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: mysql:8.0
@@ -53,6 +55,12 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 volumes:
   db_data:
