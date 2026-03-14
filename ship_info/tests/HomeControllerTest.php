@@ -59,7 +59,7 @@ class HomeControllerTest extends IntegrationTestCase
         // 古い日付の運航（欠航）→ 今日ではないので表示されないはず
         $olderOp = (new Operation())
             ->setRoute($route)
-            ->setOperationDate(new \DateTime('2025-02-10'))
+            ->setOperationDate(new \DateTimeImmutable('2025-02-10'))
             ->setStatus(['cancelled'])
             ->setStatusText(['欠航'])
             ->setCreatedAt($now)
@@ -69,7 +69,7 @@ class HomeControllerTest extends IntegrationTestCase
         // 今日の運航（通常）→ こちらが表示される
         $newerOp = (new Operation())
             ->setRoute($route)
-            ->setOperationDate(new \DateTime($today))
+            ->setOperationDate(new \DateTimeImmutable($today))
             ->setStatus(['normal'])
             ->setStatusText(['通常運航'])
             ->setCreatedAt($now)

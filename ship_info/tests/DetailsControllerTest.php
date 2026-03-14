@@ -56,7 +56,7 @@ class DetailsControllerTest extends IntegrationTestCase
         // 本日(2025-02-12)の運航 → 表示される
         $todayOp = (new Operation())
             ->setRoute($route)
-            ->setOperationDate(new \DateTime('2025-02-12'))
+            ->setOperationDate(new \DateTimeImmutable('2025-02-12'))
             ->setStatus(['normal'])
             ->setStatusText(['通常運航'])
             ->setDepartureTime(new \DateTime('2025-02-12 10:00:00'))
@@ -68,7 +68,7 @@ class DetailsControllerTest extends IntegrationTestCase
         // 前日(2025-02-11)の運航 → フィルタで除外される（欠航・異なる時刻で区別可能にする）
         $yesterdayOp = (new Operation())
             ->setRoute($route)
-            ->setOperationDate(new \DateTime('2025-02-11'))
+            ->setOperationDate(new \DateTimeImmutable('2025-02-11'))
             ->setStatus(['cancelled'])
             ->setStatusText(['欠航'])
             ->setDepartureTime(new \DateTime('2025-02-11 09:00:00'))
@@ -126,7 +126,7 @@ class DetailsControllerTest extends IntegrationTestCase
 
         $earlierOp = (new Operation())
             ->setRoute($routeEarly)
-            ->setOperationDate(new \DateTime('2025-02-12'))
+            ->setOperationDate(new \DateTimeImmutable('2025-02-12'))
             ->setStatus(['normal'])
             ->setStatusText(['通常運航'])
             ->setDepartureTime(new \DateTime('2025-02-12 08:00:00'))
@@ -136,7 +136,7 @@ class DetailsControllerTest extends IntegrationTestCase
 
         $laterOp = (new Operation())
             ->setRoute($routeLate)
-            ->setOperationDate(new \DateTime('2025-02-12'))
+            ->setOperationDate(new \DateTimeImmutable('2025-02-12'))
             ->setStatus(['normal'])
             ->setStatusText(['通常運航'])
             ->setDepartureTime(new \DateTime('2025-02-12 14:00:00'))
