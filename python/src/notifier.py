@@ -52,6 +52,8 @@ def send_alert(abnormal_entries: list[dict]) -> None:
 
     try:
         context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
         with smtplib.SMTP(smtp_host, smtp_port, timeout=10) as server:
             server.starttls(context=context)
             if smtp_user and smtp_password:
