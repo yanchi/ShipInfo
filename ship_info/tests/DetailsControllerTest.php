@@ -153,6 +153,8 @@ class DetailsControllerTest extends WebTestCase
             $content = $client->getResponse()->getContent();
             $this->assertResponseIsSuccessful();
             // 08:00 が 14:00 より前に出現する
+            $this->assertStringContainsString('08:00', $content, '08:00 が表示されていない');
+            $this->assertStringContainsString('14:00', $content, '14:00 が表示されていない');
             $this->assertLessThan(
                 strpos($content, '14:00'),
                 strpos($content, '08:00'),

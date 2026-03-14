@@ -1,4 +1,7 @@
 import logging
+from datetime import datetime
+
+from db import get_connection, get_company_id, get_route_id, upsert_operation
 from scrape_operation_details import scrape_data
 
 _STATUS_CLASS_MAP = {
@@ -7,16 +10,23 @@ _STATUS_CLASS_MAP = {
     "条件付運航": "tag-conditionally",
     "遅延": "delayed",
 }
-from datetime import datetime
-from db import get_connection, get_company_id, get_route_id, upsert_operation
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
 
 def _resolve_year(year, month):
-    """現在月より6ヶ月以上先の月は前年と判断して返す。"""
+    """年をまたぐ場合の年を補正する。
+    スクレイプ月と現在月の差が 6 ヶ月超の場合、年境界をまたいでいると判断する。
+    例: 現在 1月・スクレイプ 12月 → 差 +11 → 前年12月 (year - 1)
+    例: 現在 12月・スクレイプ 1月 → 差 -11 → 翌年1月 (year + 1)
+    """
     now = datetime.now()
-    return year - 1 if month - now.month > 6 else year
+    diff = month - now.month
+    if diff > 6:
+        return year - 1
+    if diff < -6:
+        return year + 1
+    return year
 
 
 def _parse_operation_date(year, date_str):

@@ -13,16 +13,24 @@ def get_kametoku_info(soup, direction):
         if not (port_name_tag and "亀徳港" in port_name_tag.get_text(strip=True)):
             continue
 
-        # 各データを一度だけ抽出
-        departure_date = service.select_one("div.departure span.date").get_text(strip=True)
+        # 各データを一度だけ抽出（要素が存在しない場合はスキップ）
+        date_tag = service.select_one("div.departure span.date")
+        if not date_tag:
+            logging.warning("div.departure span.date が見つかりません。スキップします。")
+            continue
+        departure_date = date_tag.get_text(strip=True)
+
         status_detail = [div.get_text(strip=True) for div in service.select("div.status")]
 
         # 「―」のみの場合は寄港なしのためスキップ
         if status_detail == ["―"]:
             continue
 
-        departure_time = service.select_one("div.departure span.time").get_text(strip=True)
-        arrival_time = service.select_one("div.entry span.time").get_text(strip=True)
+        departure_time_tag = service.select_one("div.departure span.time")
+        arrival_time_tag = service.select_one("div.entry span.time")
+        departure_time = departure_time_tag.get_text(strip=True) if departure_time_tag else None
+        arrival_time = arrival_time_tag.get_text(strip=True) if arrival_time_tag else None
+
         exp = service.select_one("div.exp")
         memo = exp.get_text(strip=True) if exp else "N/A"
 
