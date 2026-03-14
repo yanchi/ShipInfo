@@ -36,15 +36,23 @@
 ShipInfo/
 ├── python/src/              # Pythonスクレイピングコード
 │   ├── scraper.py           # スクレイピング共通処理
+│   ├── db.py                # DB接続・upsert_operation など共通クエリ
+│   ├── notifier.py          # 異常ステータス検出時のメール通知
 │   ├── aline_search.py      # A'LINEフェリー情報取得
 │   ├── get_latest_status_urls.py  # 運航情報URL収集
 │   ├── scrape_operation_details.py  # 運航詳細スクレイピング
-│   └── save_kametoku_info.py  # スクレイピングデータをDBへ保存
+│   └── save_kametoku_info.py  # スクレイピングデータをDBへ保存（upsert）
 ├── ship_info/               # Symfonyアプリケーション
-│   └── src/
-│       ├── Controller/      # HomeController, DetailsController, ContactController
-│       ├── Entity/          # Company, Operation, Route, RawScrapedData
-│       └── Repository/
+│   ├── src/
+│   │   ├── Controller/      # HomeController, DetailsController, ContactController
+│   │   ├── Entity/          # Company, Operation, Route, RawScrapedData
+│   │   └── Repository/
+│   ├── migrations/          # Doctrine migrations（4件適用済み）
+│   └── tests/
+│       ├── IntegrationTestCase.php  # 共通基底クラス（cleanupEntity / mockClock）
+│       ├── HomeControllerTest.php
+│       ├── DetailsControllerTest.php
+│       └── Controller/ContactControllerTest.php
 ├── docker-compose.yml       # python / symfony / db (MySQL) の3サービス
 ├── Dockerfile.python
 └── Dockerfile.symfony
@@ -81,6 +89,31 @@ MARIXLINE_SERVICE_URL=https://marixline.com/service/
 cd python/src
 python save_kametoku_info.py
 ```
+
+### テスト実行
+
+```bash
+docker-compose exec symfony php bin/phpunit
+```
+
+### マイグレーション
+
+```bash
+# 未適用の migration を確認
+docker-compose exec symfony php bin/console doctrine:migrations:status
+
+# 適用
+docker-compose exec symfony php bin/console doctrine:migrations:migrate --no-interaction
+```
+
+## データモデルの補足
+
+- `Operation.status` / `Operation.status_text`: JSON 配列（複数ステータス対応）
+  - status 例: `["normal"]`, `["cancelled"]`, `["delayed", "normal"]`
+  - Python 側の `_STATUS_CLASS_MAP` で日本語テキスト → CSS クラス名に変換
+- `operations` テーブルに `UNIQUE KEY unique_route_date (route_id, operation_date)` 適用済み
+  - `db.py` の `upsert_operation` で `ON DUPLICATE KEY UPDATE` を使用
+- 異常ステータス検出時は `notifier.py` 経由でメール通知（SMTP設定必須）
 
 ## 技術スタック
 

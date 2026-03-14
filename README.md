@@ -17,15 +17,21 @@ ShipInfoは、フェリー運航情報を収集し、効率的に管理・提供
 ShipInfo/
 ├── python/src/              # Pythonで実装されたスクレイピングおよびデータ保存コード
 │   ├── scraper.py                     # スクレイピング共通処理
+│   ├── db.py                          # DB接続・upsert_operation など共通クエリ
+│   ├── notifier.py                    # 異常ステータス検出時のメール通知
+│   ├── aline_search.py                # A'LINEフェリー情報取得
 │   ├── get_latest_status_urls.py      # 運航情報取得用のURLを収集
 │   ├── scrape_operation_details.py    # 運航情報のスクレイピング処理
-│   └── save_kametoku_info.py          # スクレイピングしたデータをDBに保存
+│   └── save_kametoku_info.py          # スクレイピングしたデータをDBにupsert
 ├── ship_info/               # Symfonyによるウェブアプリケーション
-│   ├── .env                 # 環境変数（本番環境用はVPSで生成）
-│   ├── config/              # Symfonyの設定ファイル
 │   ├── src/                 # アプリケーションコード
-│   ├── public/              # 公開ディレクトリ
-│   └── ...
+│   │   ├── Controller/      # HomeController, DetailsController, ContactController
+│   │   ├── Entity/          # Company, Operation, Route, RawScrapedData
+│   │   └── Repository/
+│   ├── migrations/          # Doctrine migrations
+│   ├── tests/               # PHPUnit テスト
+│   ├── config/              # Symfonyの設定ファイル
+│   └── public/              # 公開ディレクトリ
 ├── docker-compose.yml       # Docker構成ファイル
 └── README.md                # このファイル
 
@@ -54,7 +60,15 @@ MYSQL_HOST=db
 MYSQL_DATABASE=ship_info
 MYSQL_USER=user
 MYSQL_PASSWORD=password
+DATABASE_URL=mysql://user:password@db:3306/ship_info
 MARIXLINE_SERVICE_URL=https://marixline.com/service/
+# メール通知（任意）
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=your_email@example.com
+SMTP_PASSWORD=your_password
+ALERT_FROM=your_email@example.com
+ALERT_TO=your_email@example.com
 
 ---
 
@@ -64,35 +78,44 @@ docker-compose up -d
 
 ---
 
+### **5. マイグレーション適用**
+
+docker-compose exec symfony php bin/console doctrine:migrations:migrate --no-interaction
+
+---
+
 ## 📖 使い方
 
 ### **データ収集（スクレイピング）**
 
-1. Pythonスクリプトでデータを収集します。
+Pythonスクリプトでデータを収集します。
 
-cd python/src
-python save_kametoku_info.py
+docker-compose exec python python save_kametoku_info.py
 
-2. スクリプトを定期実行するには、`cron` または `task scheduler` を利用してください。
+定期実行には `cron` または `task scheduler` を利用してください。
 
 ---
 
 ### **ウェブアプリケーションの利用**
 
-1. アプリケーションにアクセスします。
+開発環境では以下のURLからアクセスできます：
 
-- 開発環境では以下のURLからアクセスできます：
-  http://localhost:8080
+- ホーム（最新運航情報）: http://localhost:8080
+- 当日の運航詳細: http://localhost:8080/details/today
+- お問い合わせ: http://localhost:8080/contact
 
-2. フェリー運航情報を閲覧または検索。
+---
+
+### **テスト実行**
+
+docker-compose exec symfony php bin/phpunit
 
 ---
 
 ## 📋 今後の改良予定
 
-- フェリー運航データのリアルタイム更新機能。
-- REST APIの拡張。
-- 複数フェリー会社に対応した柔軟なスクレイピング機能。
+- `Operation.status` の PHP enum 化（#14）
+- 複数フェリー会社に対応した柔軟なスクレイピング機能の拡充
 
 ---
 
