@@ -25,6 +25,6 @@ final class Version20260308000001 extends AbstractMigration
     {
         // JSON 配列から先頭要素を取り出して単一値に戻してから型変更
         $this->addSql("UPDATE operations SET status = JSON_UNQUOTE(JSON_EXTRACT(status, '$[0]')) WHERE status IS NOT NULL AND JSON_VALID(status) = 1");
-        $this->addSql('ALTER TABLE operations CHANGE status status LONGTEXT DEFAULT NULL');
+        $this->addSql('ALTER TABLE operations CHANGE status status VARCHAR(50) DEFAULT NULL');
     }
 }
