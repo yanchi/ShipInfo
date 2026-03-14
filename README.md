@@ -2,9 +2,9 @@
 
 [![CI](https://github.com/yanchi/ShipInfo/actions/workflows/ci.yml/badge.svg)](https://github.com/yanchi/ShipInfo/actions/workflows/ci.yml)
 
-フェリー会社のウェブサイトをスクレイピングし、運航情報（欠航・遅延・通常）を収集・保存・通知するサービス。
+A backend service that scrapes ferry company websites to collect, store, and notify on operational status (cancellations, delays, normal operations).
 
-**Python（スクレイパー）+ Symfony/PHP（Webアプリ）+ MySQL** の3層構成を Docker Compose で統合している。
+**Python (scraper) + Symfony/PHP (web app) + MySQL** — 3-tier architecture integrated with Docker Compose.
 
 ---
 
@@ -12,24 +12,24 @@
 
 ![Screenshot](docs/screenshot.png)
 
-ホーム画面。複数フェリー会社の航路ステータス（通常 / 欠航 / 条件付運航など）を一覧表示。
+Home screen. Displays route-level operational status (normal / cancelled / conditional, etc.) across multiple ferry companies in a single view.
 
 ---
 
-## アーキテクチャ
+## Architecture
 
 ```
-[フェリー会社サイト]
-       ↓ HTTP スクレイピング (BeautifulSoup)
-[Python スクレイパー]
+[Ferry Company Website]
+       ↓ HTTP scraping (BeautifulSoup)
+[Python Scraper]
        ↓ INSERT … ON DUPLICATE KEY UPDATE
 [MySQL 8.0]
        ↑ Doctrine ORM
-[Symfony 7.2 Web アプリ]
-       ↓ Twig テンプレート
-[ブラウザ]
+[Symfony 7.2 Web App]
+       ↓ Twig templates
+[Browser]
 
-異常ステータス検出時 → SMTP メール通知
+Abnormal status detected → SMTP email alert
 ```
 
 ---
@@ -37,71 +37,71 @@
 ## Data Model
 
 ```
-Company（フェリー会社）
-  └── Route（航路: 例 徳之島 ⇔ 鹿児島）
-        └── Operation（各日の運航状況: 通常 / 遅延 / 欠航 / 条件付運航 ...）
+Company (ferry operator)
+  └── Route (e.g. Tokunoshima ⇔ Kagoshima)
+        └── Operation (daily status: normal / delayed / cancelled / conditional ...)
 ```
 
-- **Company** — フェリー会社（マリックスライン、A'LINE など）
-- **Route** — 各社が持つ航路。方向（上り/下り）も保持
-- **Operation** — 日付ごとの運航状況。`status` / `status_text` は JSON 配列で複数ステータスに対応
+- **Company** — Ferry operator (Marix Line, A'LINE, etc.)
+- **Route** — Each operator's routes, including direction (inbound/outbound)
+- **Operation** — Daily operational status. `status` / `status_text` stored as JSON arrays to support multiple concurrent statuses
 
 ---
 
 ## Problem / Solution
 
-### 課題
+### Problem
 
-- フェリー会社ごとに公式サイトの構成が異なり、複数社の運航状況を横断して確認しづらい
-- 欠航・遅延などの異常ステータスを見落としやすく、利用者が気づくまでに時間がかかる
-- 公式サイトは「今この便はどうか」の確認には適しておらず、一覧性が低い
+- Each ferry company has a different website structure, making it difficult to check statuses across multiple operators at once
+- Abnormal statuses like cancellations and delays are easy to miss
+- Official sites are not designed for quick status checks and lack a consolidated view
 
-### 解決アプローチ
+### Solution
 
-- 各社サイトをスクレイピングして運航情報を収集し、共通スキーマで MySQL に保存
-- Symfony 側で統一された UI として提供し、複数社の情報を一画面で比較できる
-- 異常ステータス検出時はメール通知を送れる構成にし、見落としを防ぐ
+- Scrape each company's site and store data in MySQL using a common schema
+- Provide a unified UI via Symfony to compare multiple companies on a single screen
+- Send email alerts when abnormal statuses are detected
 
-### このプロジェクトで意識したこと
+### Design Intent
 
-単なる画面表示アプリではなく、**収集 → 保存 → 表示 → 通知** までを一貫して実装したバックエンド寄りのサービス。
-実務を想定し、冪等性・設定管理・テスタビリティ・実 DB 統合テストといった設計上の品質を重視している。
+More than a simple display app — this is a backend-oriented service covering the full pipeline: **collect → store → display → notify**.
+Designed with production use in mind, emphasizing idempotency, configuration management, testability, and real-DB integration testing.
 
 ---
 
-## 技術スタック
+## Tech Stack
 
-| レイヤー | 技術 |
+| Layer | Technology |
 |---|---|
-| スクレイピング | Python 3.12 / requests / BeautifulSoup4 |
-| バックエンド | PHP 8.2 / Symfony 7.2 / Doctrine ORM |
+| Scraping | Python 3.12 / requests / BeautifulSoup4 |
+| Backend | PHP 8.2 / Symfony 7.2 / Doctrine ORM |
 | DB | MySQL 8.0 |
-| インフラ | Docker / Docker Compose |
-| テスト | PHPUnit 9 (統合テスト) / pytest 44件 |
+| Infrastructure | Docker / Docker Compose |
+| Testing | PHPUnit 9 (integration) / pytest (44 tests) |
 | CI | GitHub Actions |
 
 ---
 
-## テスト
+## Testing
 
 ```bash
-# PHP (統合テスト: 11件)
+# PHP (integration tests: 11)
 cd ship_info && php bin/phpunit
 
-# Python (ユニットテスト: 44件)
+# Python (unit tests: 44)
 cd python && python -m pytest tests/ -v
 ```
 
-GitHub Actions で `push` / `pull_request` 時に自動実行される。MySQL サービスコンテナを CI 上で起動し、実DBに対してマイグレーションとテストを実行。
+Runs automatically on `push` / `pull_request` via GitHub Actions. A MySQL service container is spun up in CI and migrations are applied before tests run against the real DB.
 
 ---
 
-## 設計上のこだわり
+## Design Highlights
 
-### 1. upsert で冪等なデータ収集
+### 1. Idempotent data collection via upsert
 
-スクレイパーが同一データを再実行しても重複しないよう、`INSERT … ON DUPLICATE KEY UPDATE` を使用。
-DBレベルのユニーク制約 `(route_id, operation_date)` と組み合わせて一貫性を保証している。
+Uses `INSERT … ON DUPLICATE KEY UPDATE` so re-running the scraper never creates duplicate records.
+Combined with a DB-level unique constraint `(route_id, operation_date)` to guarantee consistency.
 
 ```python
 # python/src/db.py
@@ -112,27 +112,27 @@ cursor.execute("""
 """, ...)
 ```
 
-### 2. 異常ステータス検出時のメール通知
+### 2. Email alerts on abnormal status detection
 
-欠航・遅延などの非通常ステータスをスクレイプ時に検出し、SMTP でアラートメールを送信。
-`SMTP_HOST` 未設定時は警告ログのみでクラッシュしない設計。
+Detects non-normal statuses (cancellations, delays) at scrape time and sends an SMTP alert.
+Gracefully skips notification if `SMTP_HOST` is not configured — logs a warning instead of crashing.
 
 ```python
 # python/src/notifier.py
 def send_alert(abnormal_entries: list[dict]) -> None:
     if not abnormal_entries:
         return
-    # 環境変数未設定はスキップ（ログ出力）
+    # Skip gracefully if env vars are not set
     if not smtp_host or not notify_to:
         logging.warning("...")
         return
     ...
 ```
 
-### 3. `ClockInterface` 注入によるテスタビリティ
+### 3. Testability via `ClockInterface` injection
 
-「今日の運航情報」を返すコントローラーで、`new \DateTime('now')` を直接呼ばず PSR の `ClockInterface` を注入。
-テストから任意の日付に差し替えられる。
+The "today's operations" controller injects PSR's `ClockInterface` instead of calling `new \DateTime('now')` directly.
+This allows tests to substitute any date without mocking the system clock.
 
 ```php
 // ship_info/src/Controller/DetailsController.php
@@ -141,14 +141,13 @@ public function __construct(
     #[Autowire(param: 'app.company_urls')] private readonly array $companyUrls,
 ) {}
 
-// テストでは MockClock を差し込む
+// In tests, inject a mock clock
 $mockClock->method('now')->willReturn(new \DateTimeImmutable('2025-02-12'));
 ```
 
-### 4. Symfony パラメータによる設定の一元管理
+### 4. Centralized configuration via Symfony parameters
 
-フェリー会社の公式サイト URL をコントローラーにハードコードせず、`services.yaml` の `parameters` に集約。
-`#[Autowire(param: '...')]` で型安全に注入。
+Ferry company URLs are not hardcoded in controllers — they are defined in `services.yaml` under `parameters` and injected type-safely via `#[Autowire(param: '...')]`.
 
 ```yaml
 # ship_info/config/services.yaml
@@ -158,10 +157,10 @@ parameters:
         "A'LINE": 'https://www.aline-ferry.com/'
 ```
 
-### 5. 実DBを使った統合テスト
+### 5. Integration tests against a real DB
 
-モックDBを避け、テスト専用DB（`ship_info_test`）に対して実際にデータを投入・検証。
-`WebTestCase` ベースの統合テストで、HTTPリクエストからレンダリング結果まで一気通貫でテストしている。
+Avoids mocking the database. Tests run against a dedicated test DB (`ship_info_test`) with actual data inserts and assertions.
+`WebTestCase`-based integration tests cover the full path from HTTP request to rendered response.
 
 ```php
 // ship_info/tests/IntegrationTestCase.php
@@ -174,32 +173,32 @@ abstract class IntegrationTestCase extends WebTestCase
 
 ---
 
-## ローカル起動
+## Local Setup
 
 ```bash
-# 1. コンテナ起動
+# 1. Start containers
 docker-compose up -d
 
-# 2. マイグレーション
+# 2. Run migrations
 docker-compose exec symfony php bin/console doctrine:migrations:migrate --no-interaction
 
-# 3. スクレイピング実行
+# 3. Run scraper
 docker-compose exec python python save_kametoku_info.py
 ```
 
-| URL | 内容 |
+| URL | Description |
 |---|---|
-| http://localhost:8080 | 各航路の最新運航ステータス |
-| http://localhost:8080/details/today | 当日の便一覧（出発時刻順） |
-| http://localhost:8080/contact | お問い合わせ |
+| http://localhost:8080 | Latest operational status per route |
+| http://localhost:8080/details/today | Today's departures (sorted by time) |
+| http://localhost:8080/contact | Contact form |
 
-### 環境変数 (`.env`)
+### Environment Variables (`.env`)
 
 ```env
 APP_ENV=dev
 DATABASE_URL=mysql://user:password@db:3306/ship_info
 MARIXLINE_SERVICE_URL=https://marixline.com/service/
-# メール通知（省略可）
+# Email alerts (optional)
 SMTP_HOST=smtp.example.com
 SMTP_PORT=587
 SMTP_USER=your@example.com
@@ -210,7 +209,7 @@ NOTIFY_TO=alert@example.com
 
 ---
 
-## 今後の予定
+## Future Work
 
-- `Operation.status` の PHP enum 化（[#14](https://github.com/yanchi/ShipInfo/issues/14)）
-- 対応フェリー会社の拡充
+- PHP enum for `Operation.status` ([#14](https://github.com/yanchi/ShipInfo/issues/14))
+- Support for additional ferry operators
