@@ -3,6 +3,7 @@ import requests
 from datetime import date, datetime
 from bs4 import BeautifulSoup
 from db import get_connection, get_company_id, get_route_id, upsert_operation
+from notifier import send_alert
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
@@ -111,6 +112,8 @@ def fetch_and_save_data():
     company_name = "A'LINE"
     now = datetime.now()
 
+    abnormal_entries = []
+
     with get_connection() as connection:
         with connection.cursor(buffered=True) as cursor:
             company_id = get_company_id(cursor, company_name)
@@ -136,6 +139,15 @@ def fetch_and_save_data():
                     arrival_time = _parse_datetime(result.get("下船日時"))
                     departure_time = _parse_datetime(result.get("乗船日時"))
 
+                    if any(c and "normal" not in c.split() for c in result['Classes']):
+                        abnormal_entries.append({
+                            "運航日": operation_date,
+                            "方向": direction,
+                            "状況詳細": result['Texts'],
+                            "備考": None,
+                            "会社名": company_name,
+                        })
+
                     upsert_operation(
                         cursor, route_id, operation_date,
                         result['Classes'], result['Texts'],
@@ -145,6 +157,7 @@ def fetch_and_save_data():
                     logging.error(f"Error inserting operation: {e}", exc_info=True)
 
     logging.info("データが正常に保存されました。")
+    send_alert(abnormal_entries)
 
 
 if __name__ == "__main__":
