@@ -1,6 +1,6 @@
 import logging
 import requests
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from bs4 import BeautifulSoup
 from db import get_connection, get_company_id, get_route_id, upsert_operation
 from notifier import send_alert
@@ -10,9 +10,15 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(mess
 BASE_URL = "https://www.aline-ferry.com/search/"
 
 # A'LINE フェリー 検索用ポートコード（サイト内部ID）
-_PORT_KAKEROMA = "78"   # 加計呂麻島（出発港）
-_PORT_KAGOSHIMA = "83"  # 鹿児島
-_PORT_NAHA = "50"       # 那覇
+_PORT_KAMETOKU = "78"   # 亀徳
+_PORT_NAHA = "83"       # 那覇
+_PORT_KAGOSHIMA = "50"  # 鹿児島
+
+# 亀徳港からの所要時間（スケジュール基準の固定値）
+# 下り（亀徳 → 那覇）: 約 9 時間 20 分
+# 上り（亀徳 → 鹿児島）: 約 15 時間 30 分
+_TRAVEL_DELTA_KUDARI = timedelta(hours=9, minutes=20)
+_TRAVEL_DELTA_NOBORI = timedelta(hours=15, minutes=30)
 
 
 def _parse_operation_date(date_str):
@@ -35,8 +41,8 @@ def _parse_datetime(dt_str):
 def fetch_results():
     today = date.today().strftime("%Y年%m月%d日")
     search_conditions = [
-        {"startDate": today, "startPort": _PORT_KAKEROMA, "endPort": _PORT_KAGOSHIMA},
-        {"startDate": today, "startPort": _PORT_KAKEROMA, "endPort": _PORT_NAHA},
+        {"startDate": today, "startPort": _PORT_KAMETOKU, "endPort": _PORT_KAGOSHIMA},
+        {"startDate": today, "startPort": _PORT_KAMETOKU, "endPort": _PORT_NAHA},
     ]
     results = []
     for data in search_conditions:
@@ -136,8 +142,12 @@ def fetch_and_save_data():
 
                 try:
                     operation_date = _parse_operation_date(result["乗船日"])
-                    arrival_time = _parse_datetime(result.get("下船日時"))
                     departure_time = _parse_datetime(result.get("乗船日時"))
+                    if departure_time:
+                        delta = _TRAVEL_DELTA_KUDARI if direction == "下り" else _TRAVEL_DELTA_NOBORI
+                        arrival_time = (datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S") + delta).strftime("%Y-%m-%d %H:%M:%S")
+                    else:
+                        arrival_time = None
 
                     if any(c and "normal" not in c.split() for c in result['Classes']):
                         abnormal_entries.append({

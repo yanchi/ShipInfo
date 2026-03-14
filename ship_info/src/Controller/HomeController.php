@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Repository\CompanyRepository;
 use App\Repository\OperationRepository;
+use Doctrine\DBAL\Types\Types;
+use Psr\Clock\ClockInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,6 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class HomeController extends AbstractController
 {
     public function __construct(
+        private readonly ClockInterface $clock,
         #[Autowire(param: 'app.company_urls')] private readonly array $companyUrls,
     ) {}
 
@@ -20,6 +23,8 @@ class HomeController extends AbstractController
         CompanyRepository $companyRepository,
         OperationRepository $operationRepository
     ): Response {
+        $today = \DateTimeImmutable::createFromInterface($this->clock->now())->setTime(0, 0, 0);
+
         // 会社と航路を1クエリで取得
         $companies = $companyRepository->createQueryBuilder('c')
             ->leftJoin('c.routes', 'r')
@@ -28,7 +33,7 @@ class HomeController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        // 全航路IDを収集して、最新運航情報を1クエリで取得
+        // 全航路IDを収集して、今日の運航情報を1クエリで取得
         $routeIds = [];
         foreach ($companies as $company) {
             foreach ($company->getRoutes() as $route) {
@@ -36,14 +41,19 @@ class HomeController extends AbstractController
             }
         }
 
-        $latestByRoute = [];
+        $todayByRoute = [];
         if ($routeIds) {
-            $ops = $operationRepository->findLatestByRouteIds($routeIds);
+            $ops = $operationRepository->createQueryBuilder('o')
+                ->join('o.route', 'r')
+                ->addSelect('r')
+                ->where('o.route IN (:ids)')
+                ->andWhere('o.operationDate = :today')
+                ->setParameter('ids', $routeIds)
+                ->setParameter('today', $today, Types::DATE_IMMUTABLE)
+                ->getQuery()
+                ->getResult();
             foreach ($ops as $op) {
-                $rid = $op->getRoute()->getId();
-                if (!isset($latestByRoute[$rid])) {
-                    $latestByRoute[$rid] = $op;
-                }
+                $todayByRoute[$op->getRoute()->getId()] = $op;
             }
         }
 
@@ -52,12 +62,16 @@ class HomeController extends AbstractController
         foreach ($companies as $company) {
             $routeData = [];
             foreach ($company->getRoutes() as $route) {
-                $operation = $latestByRoute[$route->getId()] ?? null;
-                $statusClasses = $operation?->getStatus() ?? [];
-                $statusTexts = $operation?->getStatusText() ?: ['通常運航'];
-                $statuses = [];
-                foreach ($statusTexts as $i => $text) {
-                    $statuses[] = ['class' => $statusClasses[$i] ?? '', 'text' => $text];
+                $operation = $todayByRoute[$route->getId()] ?? null;
+                if ($operation === null) {
+                    $statuses = [['class' => 'no-info', 'text' => '運航予定なし']];
+                } else {
+                    $statusClasses = $operation->getStatus() ?? [];
+                    $statusTexts = $operation->getStatusText() ?: ['通常運航'];
+                    $statuses = [];
+                    foreach ($statusTexts as $i => $text) {
+                        $statuses[] = ['class' => $statusClasses[$i] ?? '', 'text' => $text];
+                    }
                 }
                 $routeData[] = [
                     'name' => $route->getName(),

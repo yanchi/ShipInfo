@@ -18,6 +18,8 @@
     --color-status-suspend-text: #383d41;
     --color-status-tag-port-bg: #cce5ff;
     --color-status-tag-port-text: #004085;
+    --color-status-no-info-bg: #e2e3e5;
+    --color-status-no-info-text: #6c757d;
     --color-text-light: #666;
 }
 
@@ -28,7 +30,7 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: "Hiragino Kaku Gothic Pro", "Yu Gothic", YuGothic, Arial, sans-serif;
     margin: 0;
     padding: 0;
     background-color: var(--color-bg);
@@ -124,6 +126,16 @@ h2 {
 .status.tag-port {
     background-color: var(--color-status-tag-port-bg);
     color: var(--color-status-tag-port-text);
+}
+
+.status.no-info {
+    background-color: var(--color-status-no-info-bg);
+    color: var(--color-status-no-info-text);
+}
+
+.status.tag-normal {
+    background-color: var(--color-status-normal-bg);
+    color: var(--color-status-normal-text);
 }
 
 .status.tag-conditionally {

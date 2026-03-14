@@ -20,14 +20,14 @@ class Operation
     #[ORM\JoinColumn(name: "route_id", referencedColumnName: "id", nullable: false)]
     private ?Route $route = null;
 
-    #[ORM\Column(name: "operation_date", type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $operationDate = null;
+    #[ORM\Column(name: "operation_date", type: Types::DATE_IMMUTABLE)]
+    private ?\DateTimeImmutable $operationDate = null;
 
     #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?array $status = null;
 
     #[ORM\Column(type: Types::JSON, nullable: true)]
-    private ?array $status_text = null;
+    private ?array $statusText = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $arrivalTime = null;
@@ -61,12 +61,12 @@ class Operation
         return $this;
     }
 
-    public function getOperationDate(): ?\DateTimeInterface
+    public function getOperationDate(): ?\DateTimeImmutable
     {
         return $this->operationDate;
     }
 
-    public function setOperationDate(\DateTimeInterface $operationDate): static
+    public function setOperationDate(\DateTimeImmutable $operationDate): static
     {
         $this->operationDate = $operationDate;
 
@@ -87,12 +87,12 @@ class Operation
 
     public function getStatusText(): ?array
     {
-        return $this->status_text;
+        return $this->statusText;
     }
 
-    public function setStatusText(?array $status_text): static
+    public function setStatusText(?array $statusText): static
     {
-        $this->status_text = $status_text;
+        $this->statusText = $statusText;
 
         return $this;
     }

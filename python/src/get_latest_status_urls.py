@@ -3,15 +3,11 @@ import requests # type: ignore
 from bs4 import BeautifulSoup # type: ignore
 import os
 
-# 環境変数から値を取得
-MARIXLINE_SERVICE_URL = os.getenv("MARIXLINE_SERVICE_URL")
-
-if not MARIXLINE_SERVICE_URL:
-    raise ValueError("MARIXLINE_SERVICE_URL is not defined in the .env file.")
-
 
 def get_latest_status_urls():
-    url = MARIXLINE_SERVICE_URL
+    url = os.getenv("MARIXLINE_SERVICE_URL")
+    if not url:
+        raise ValueError("MARIXLINE_SERVICE_URL is not defined in the .env file.")
     try:
         response = requests.get(url, timeout=10)
         response.raise_for_status()  # ステータスコードがエラーの場合、例外を発生
