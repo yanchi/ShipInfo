@@ -17,9 +17,8 @@ class OperationRepository extends ServiceEntityRepository
     }
 
     /**
-     * 指定した航路IDの最新 operationDate を持つ Operation を返す。
-     * 同一 route+date の重複が存在する場合は複数件返り得る（id DESC 順）。
-     * 呼び出し側で route ごとに先頭 1 件を採用すること。
+     * 指定した航路IDごとに最新 operationDate かつ最大 ID を持つ Operation を 1 件ずつ返す。
+     * 同一 route+date の重複がある場合は ID が最大のレコードを採用する。
      *
      * @param int[] $routeIds
      * @return Operation[]
@@ -30,17 +29,23 @@ class OperationRepository extends ServiceEntityRepository
             return [];
         }
 
-        $subQb = $this->createQueryBuilder('o2')
+        // 最新 operationDate を取得する相関サブクエリ（o3 用）
+        $maxDateSubQb = $this->createQueryBuilder('o2')
             ->select('MAX(o2.operationDate)')
-            ->where('o2.route = o.route');
+            ->where('o2.route = o3.route');
+
+        // route ごとの最新日付の中で最大 ID を取得する相関サブクエリ
+        $maxIdSubQb = $this->createQueryBuilder('o3')
+            ->select('MAX(o3.id)')
+            ->where('o3.route = o.route')
+            ->andWhere('o3.operationDate = (' . $maxDateSubQb->getDQL() . ')');
 
         return $this->createQueryBuilder('o')
             ->join('o.route', 'r')
             ->addSelect('r')
             ->where('o.route IN (:ids)')
             ->setParameter('ids', $routeIds)
-            ->andWhere('o.operationDate = (' . $subQb->getDQL() . ')')
-            ->orderBy('o.id', 'DESC')
+            ->andWhere('o.id = (' . $maxIdSubQb->getDQL() . ')')
             ->getQuery()
             ->getResult();
     }
