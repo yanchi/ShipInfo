@@ -1,3 +1,26 @@
+/* CSS変数 */
+:root {
+    --color-primary: #0073e6;
+    --color-text: #333;
+    --color-text-muted: #555;
+    --color-bg: #f4f4f9;
+    --color-bg-white: #ffffff;
+    --color-bg-light: #f9f9f9;
+    --color-border: #ddd;
+    --color-footer-bg: #333;
+    --color-status-normal-bg: #d4edda;
+    --color-status-normal-text: #155724;
+    --color-status-delayed-bg: #fff3cd;
+    --color-status-delayed-text: #856404;
+    --color-status-cancelled-bg: #f8d7da;
+    --color-status-cancelled-text: #721c24;
+    --color-status-suspend-bg: #e2e3e5;
+    --color-status-suspend-text: #383d41;
+    --color-status-tag-port-bg: #cce5ff;
+    --color-status-tag-port-text: #004085;
+    --color-text-light: #666;
+}
+
 /* 基本スタイル */
 /* 全体のbox-sizingを統一 */
 * {
@@ -8,12 +31,12 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f9;
-    color: #333;
+    background-color: var(--color-bg);
+    color: var(--color-text);
 }
 
 header {
-    background-color: #0073e6;
+    background-color: var(--color-primary);
     color: white;
     padding: 1rem 0;
     text-align: center;
@@ -52,7 +75,7 @@ main {
 }
 
 h2 {
-    border-bottom: 2px solid #0073e6;
+    border-bottom: 2px solid var(--color-primary);
     padding-bottom: 0.5rem;
     margin-bottom: 1rem;
     font-size: 1.5rem;
@@ -79,43 +102,43 @@ h2 {
 }
 
 .status.normal {
-    background-color: #d4edda;
-    color: #155724;
+    background-color: var(--color-status-normal-bg);
+    color: var(--color-status-normal-text);
 }
 
 .status.delayed {
-    background-color: #fff3cd;
-    color: #856404;
+    background-color: var(--color-status-delayed-bg);
+    color: var(--color-status-delayed-text);
 }
 
 .status.cancelled {
-    background-color: #f8d7da;
-    color: #721c24;
+    background-color: var(--color-status-cancelled-bg);
+    color: var(--color-status-cancelled-text);
 }
 
 .status.suspend {
-    background-color: #e2e3e5;
-    color: #383d41;
+    background-color: var(--color-status-suspend-bg);
+    color: var(--color-status-suspend-text);
 }
 
 .status.tag-port {
-    background-color: #cce5ff;
-    color: #004085;
+    background-color: var(--color-status-tag-port-bg);
+    color: var(--color-status-tag-port-text);
 }
 
 .status.tag-conditionally {
-    background-color: #fff3cd;
-    color: #856404;
+    background-color: var(--color-status-delayed-bg);
+    color: var(--color-status-delayed-text);
 }
 
 .route-direction {
     font-size: 0.85em;
-    color: #666;
+    color: var(--color-text-light);
     margin: 0 0 0.5rem 0;
 }
 
 footer {
-    background-color: #333;
+    background-color: var(--color-footer-bg);
     color: white;
     text-align: center;
     padding: 1rem 0;
@@ -124,15 +147,15 @@ footer {
 
 /* 詳細ページと共通するスタイル */
 .route-detail {
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-border);
     padding: 10px;
     margin-bottom: 20px;
-    background-color: #f9f9f9;
+    background-color: var(--color-bg-light);
     border-radius: 5px;
 }
 
 .route-detail h3 {
-    color: #333;
+    color: var(--color-text);
     font-size: 18px;
     margin-bottom: 10px;
 }
@@ -159,13 +182,13 @@ footer {
     margin-bottom: 10px;
     font-size: 16px;
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-border);
     border-radius: 5px;
-    background-color: #f9f9f9;
+    background-color: var(--color-bg-light);
 }
 
 #contact li strong {
-    color: #333;
+    color: var(--color-text);
     font-weight: bold;
 }
 
@@ -173,7 +196,7 @@ footer {
 .company-section {
     margin-bottom: 2rem;
     padding: 1rem;
-    background-color: #ffffff;
+    background-color: var(--color-bg-white);
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -182,9 +205,9 @@ footer {
 .route-section {
     margin-bottom: 1.5rem;
     padding: 1rem;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-border);
     border-radius: 5px;
-    background-color: #f9f9f9;
+    background-color: var(--color-bg-light);
 }
 
 /* カードコンテナ */
@@ -198,7 +221,7 @@ footer {
 
 .route-card {
     background: #ffffff;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-border);
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     padding: 15px;
@@ -207,7 +230,7 @@ footer {
 /* カードの内容デザイン */
 .route-card h4 {
     font-size: 1.2em;
-    color: #333;
+    color: var(--color-text);
     margin-bottom: 10px;
     border-bottom: 1px solid #ddd;
     padding-bottom: 5px;
@@ -216,12 +239,12 @@ footer {
 .route-card p {
     margin: 5px 0;
     font-size: 0.95em;
-    color: #555;
+    color: var(--color-text-muted);
 }
 
 .route-card p span.label {
     font-weight: bold;
-    color: #333;
+    color: var(--color-text);
 }
 
 /* フェリー会社のタイトル */
@@ -243,13 +266,21 @@ footer {
     font-size: 0.9rem;
 }
 
+/* 備考メモ */
+.operation-memo {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+    margin-top: 0.25rem;
+}
+
 /* データなしのメッセージ */
 .no-data {
-    color: #666;
+    color: var(--color-text-light);
     font-style: italic;
     padding: 0.5rem;
     text-align: center;
-    background-color: #f9f9f9;
+    background-color: var(--color-bg-light);
     border-radius: 5px;
     margin-top: 1rem;
 }

@@ -5,6 +5,10 @@ from contextlib import contextmanager
 
 
 def get_db_config():
+    required = {"MYSQL_HOST", "MYSQL_USER", "MYSQL_PASSWORD", "MYSQL_DATABASE"}
+    missing = [k for k in required if not os.getenv(k)]
+    if missing:
+        raise EnvironmentError(f"必須の環境変数が設定されていません: {', '.join(missing)}")
     return {
         'host': os.getenv("MYSQL_HOST"),
         'user': os.getenv("MYSQL_USER"),
@@ -52,5 +56,5 @@ def upsert_operation(cursor, route_id, operation_date, status, status_text,
             route_id, operation_date, status, status_text, arrival_time, departure_time, memo, created_at, updated_at
         )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ON DUPLICATE KEY UPDATE status = VALUES(status), status_text = VALUES(status_text)
+        ON DUPLICATE KEY UPDATE status = VALUES(status), status_text = VALUES(status_text), updated_at = VALUES(updated_at)
     """, (route_id, operation_date, status, status_text, arrival_time, departure_time, memo, now, now))

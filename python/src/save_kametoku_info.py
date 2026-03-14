@@ -29,18 +29,22 @@ def _resolve_year(year, month):
     return year
 
 
+def _parse_date_object(year, date_str):
+    """'MM月DD日' を date オブジェクトに変換。年またぎを補正する。"""
+    dt = datetime.strptime(f"{year}年{date_str}", "%Y年%m月%d日")
+    return dt.replace(year=_resolve_year(year, dt.month))
+
+
 def _parse_operation_date(year, date_str):
     """'MM月DD日' を '%Y-%m-%d' に変換。年をまたぐ場合を考慮する。"""
-    dt = datetime.strptime(f"{year}年{date_str}", "%Y年%m月%d日")
-    dt = dt.replace(year=_resolve_year(year, dt.month))
-    return dt.strftime("%Y-%m-%d")
+    return _parse_date_object(year, date_str).strftime("%Y-%m-%d")
 
 
 def _parse_time(year, date_str, time_str):
+    """'HH:MM' 形式の time_str を '%Y-%m-%d %H:%M:%S' に変換。None または空文字は None を返す。"""
     if not time_str:
         return None
-    dt = datetime.strptime(f"{year}年{date_str}", "%Y年%m月%d日")
-    dt = dt.replace(year=_resolve_year(year, dt.month))
+    dt = _parse_date_object(year, date_str)
     return f"{dt.strftime('%Y-%m-%d')} {time_str}:00"
 
 
@@ -71,14 +75,20 @@ def save_kametoku_info():
                     departure_time = _parse_time(year, entry["運航日"], entry["出発時刻"])
 
                     status_texts = entry["状況詳細"]
-                    status_classes = [_STATUS_CLASS_MAP.get(t, "normal") for t in status_texts]
+                    status_classes = []
+                    for t in status_texts:
+                        css_class = _STATUS_CLASS_MAP.get(t)
+                        if css_class is None:
+                            logging.warning(f"未知のステータス文字列: '{t}' → 'normal' にフォールバック")
+                            css_class = "normal"
+                        status_classes.append(css_class)
                     upsert_operation(
                         cursor, route_id, operation_date,
                         status_classes, status_texts,
                         arrival_time, departure_time, entry["備考"], now
                     )
                 except Exception as e:
-                    logging.error(f"Error inserting operation: {e}")
+                    logging.error(f"Error inserting operation: {e}", exc_info=True)
 
     logging.info("データが正常に保存されました。")
 

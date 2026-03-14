@@ -67,6 +67,9 @@ class Route
 
     public function setDirection(?string $direction): static
     {
+        if ($direction !== null && !in_array($direction, ['上り', '下り'], true)) {
+            throw new \InvalidArgumentException("不正な方向値: '$direction'。'上り' または '下り' を指定してください。");
+        }
         $this->direction = $direction;
 
         return $this;

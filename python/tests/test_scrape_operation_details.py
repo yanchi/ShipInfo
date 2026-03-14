@@ -73,7 +73,7 @@ class TestGetKametokuInfo:
         entry = result[0]
         assert entry["運航日"] == "2月14日"
         assert entry["方向"] == "上り"
-        assert entry["状況詳細"] == "通常運航"
+        assert entry["状況詳細"] == ["通常運航"]
         assert entry["出発時刻"] == "10:30"
         assert entry["到着時刻"] == "16:00"
         assert entry["備考"] == "天候良好"

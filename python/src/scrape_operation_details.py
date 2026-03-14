@@ -3,6 +3,8 @@ import requests  # type: ignore
 from bs4 import BeautifulSoup  # type: ignore
 from get_latest_status_urls import get_latest_status_urls  # URL取得用の関数をインポート
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+
 # 亀徳港の情報を抽出する関数（解析処理）
 def get_kametoku_info(soup, direction):
     services = soup.find_all("div", class_="single")
@@ -70,12 +72,17 @@ def scrape_data():
             html_content = fetch_html(url)
             soup = BeautifulSoup(html_content, "html.parser")
             direction = parse_direction_from_h1(soup)
+            if direction == "N/A":
+                logging.warning(f"h1 から方向を特定できませんでした。スキップします: {url}")
+                continue
             kametoku_data = get_kametoku_info(soup, direction)
 
             if kametoku_data:
                 all_kametoku_data.extend(kametoku_data)
             else:
                 logging.warning("亀徳港のデータは見つかりませんでした。")
+        except requests.RequestException as e:
+            logging.error(f"HTTP エラーが発生しました: {e}")
         except Exception as e:
-            logging.error(f"エラーが発生しました: {e}")
+            logging.error(f"予期しないエラーが発生しました: {e}", exc_info=True)
     return all_kametoku_data
