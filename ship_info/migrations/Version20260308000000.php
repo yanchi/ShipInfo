@@ -23,6 +23,8 @@ final class Version20260308000000 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
+        // JSON 配列から先頭要素を取り出して単一値に戻してから型変更
+        $this->addSql("UPDATE operations SET status_text = JSON_UNQUOTE(JSON_EXTRACT(status_text, '$[0]')) WHERE status_text IS NOT NULL AND JSON_VALID(status_text) = 1");
         $this->addSql('ALTER TABLE operations CHANGE status_text status_text LONGTEXT DEFAULT NULL');
     }
 }
