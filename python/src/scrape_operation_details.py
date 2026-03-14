@@ -24,6 +24,10 @@ def get_kametoku_info(soup, direction):
 
         status_detail = [div.get_text(strip=True) for div in service.select("div.status")]
 
+        if not status_detail:
+            logging.warning("div.status が見つかりません。スキップします。")
+            continue
+
         # 「―」のみの場合は寄港なしのためスキップ
         if status_detail == ["―"]:
             continue

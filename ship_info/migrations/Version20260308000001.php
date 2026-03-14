@@ -23,6 +23,6 @@ final class Version20260308000001 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-        $this->addSql('ALTER TABLE operations CHANGE status status VARCHAR(50) DEFAULT NULL');
+        $this->addSql('ALTER TABLE operations CHANGE status status LONGTEXT DEFAULT NULL');
     }
 }

@@ -27,7 +27,8 @@
                                         {% for operation in routeOps %}
                                             <div class="operation-details">
                                                 {% set statusClasses = operation.getStatus() ?? [] %}
-                                                {% for key, statusText in (operation.getStatusText() ?? ['通常運航']) %}
+                                                {% set statusTexts = operation.getStatusText() ?? [] %}
+                                                {% for key, statusText in (statusTexts is not empty ? statusTexts : ['通常運航']) %}
                                                     {% set statusClass = statusClasses[key] ?? '' %}
                                                     <span class="status {{ statusClass ?: 'normal' }}">{{ statusText }}</span>
                                                 {% endfor %}

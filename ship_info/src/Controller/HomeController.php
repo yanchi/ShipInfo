@@ -49,7 +49,7 @@ class HomeController extends AbstractController
             foreach ($company->getRoutes() as $route) {
                 $operation = $latestByRoute[$route->getId()] ?? null;
                 $statusClasses = $operation?->getStatus() ?? [];
-                $statusTexts = $operation?->getStatusText() ?? ['通常運航'];
+                $statusTexts = $operation?->getStatusText() ?: ['通常運航'];
                 $statuses = [];
                 foreach ($statusTexts as $i => $text) {
                     $statuses[] = ['class' => $statusClasses[$i] ?? '', 'text' => $text];
