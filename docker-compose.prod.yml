@@ -31,6 +31,9 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MESSENGER_TRANSPORT_DSN: ${MESSENGER_TRANSPORT_DSN:-doctrine://default?auto_setup=0}
+      MAILER_DSN: ${MAILER_DSN:-null://null}
+      APP_SECRET: ${APP_SECRET}
     depends_on:
       - db
 
