@@ -28,11 +28,11 @@ RUN a2ensite 000-default.conf
 RUN a2enmod rewrite
 
 # Symfonyが.envを要求するので最小限のものを作成（実際の値はdocker-composeの環境変数で上書き）
-RUN printf "APP_ENV=prod\nAPP_SECRET=placeholder\nDATABASE_URL=mysql://user:password@localhost/ship_info\n" > /var/www/html/.env
+# DATABASE_URL は env(resolve:...) でコンパイル時解決されるためビルド時に含めない
+RUN printf "APP_ENV=prod\nAPP_SECRET=placeholder\n" > /var/www/html/.env
 
-# 依存関係インストール & キャッシュウォームアップ
-RUN APP_ENV=prod composer install --no-dev --optimize-autoloader --no-interaction \
-    && APP_ENV=prod php bin/console cache:warmup --env=prod
+# 依存関係インストール（--no-scripts でコンパイル時環境変数依存の post-install を回避）
+RUN APP_ENV=prod composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # 必要なディレクトリの権限を設定
 RUN mkdir -p /var/www/html/var/cache/prod /var/www/html/var/log \

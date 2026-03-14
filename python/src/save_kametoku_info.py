@@ -12,6 +12,12 @@ _STATUS_CLASS_MAP = {
     "遅延": "delayed",
 }
 
+# 亀徳港からの所要時間（スケジュール基準の固定値）
+# 下り（亀徳 → 那覇）: 約 9 時間 20 分
+# 上り（亀徳 → 鹿児島）: 約 16 時間
+_TRAVEL_DELTA_KUDARI = timedelta(hours=9, minutes=20)
+_TRAVEL_DELTA_NOBORI = timedelta(hours=16)
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
 
@@ -76,7 +82,7 @@ def save_kametoku_info():
                     operation_date = _parse_operation_date(year, entry["運航日"])
                     departure_time = _parse_time(year, entry["運航日"], entry["出発時刻"])
                     if departure_time:
-                        delta = timedelta(hours=9, minutes=20) if entry["方向"] == "下り" else timedelta(hours=16)
+                        delta = _TRAVEL_DELTA_KUDARI if entry["方向"] == "下り" else _TRAVEL_DELTA_NOBORI
                         arrival_time = (datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S") + delta).strftime("%Y-%m-%d %H:%M:%S")
                     else:
                         arrival_time = None

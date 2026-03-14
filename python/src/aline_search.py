@@ -14,6 +14,12 @@ _PORT_KAMETOKU = "78"   # 亀徳
 _PORT_NAHA = "83"       # 那覇
 _PORT_KAGOSHIMA = "50"  # 鹿児島
 
+# 亀徳港からの所要時間（スケジュール基準の固定値）
+# 下り（亀徳 → 那覇）: 約 9 時間 20 分
+# 上り（亀徳 → 鹿児島）: 約 15 時間 30 分
+_TRAVEL_DELTA_KUDARI = timedelta(hours=9, minutes=20)
+_TRAVEL_DELTA_NOBORI = timedelta(hours=15, minutes=30)
+
 
 def _parse_operation_date(date_str):
     """'YYYY年MM月DD日(曜日)' を '%Y-%m-%d' に変換。"""
@@ -138,7 +144,7 @@ def fetch_and_save_data():
                     operation_date = _parse_operation_date(result["乗船日"])
                     departure_time = _parse_datetime(result.get("乗船日時"))
                     if departure_time:
-                        delta = timedelta(hours=9, minutes=20) if direction == "下り" else timedelta(hours=15, minutes=30)
+                        delta = _TRAVEL_DELTA_KUDARI if direction == "下り" else _TRAVEL_DELTA_NOBORI
                         arrival_time = (datetime.strptime(departure_time, "%Y-%m-%d %H:%M:%S") + delta).strftime("%Y-%m-%d %H:%M:%S")
                     else:
                         arrival_time = None
