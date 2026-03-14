@@ -35,6 +35,10 @@ jobs:
           extensions: pdo_mysql, intl
           coverage: none
 
+      - name: Create .env
+        working-directory: ship_info
+        run: touch .env
+
       - name: Install Composer dependencies
         working-directory: ship_info
         run: composer install --no-interaction --prefer-dist
