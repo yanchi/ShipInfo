@@ -30,7 +30,7 @@ def _resolve_year(year, month):
 
 
 def _parse_date_object(year, date_str):
-    """'MM月DD日' を date オブジェクトに変換。年またぎを補正する。"""
+    """'MM月DD日' を datetime オブジェクトに変換。年またぎを補正する。"""
     dt = datetime.strptime(f"{year}年{date_str}", "%Y年%m月%d日")
     return dt.replace(year=_resolve_year(year, dt.month))
 
