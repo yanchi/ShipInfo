@@ -1,0 +1,2 @@
+0 0,6,15 * * * docker compose -f /home/rocky/ShipInfo/docker-compose.prod.yml exec -T python python3 /app/src/save_kametoku_info.py >> /home/rocky/scrape.log 2>&1
+0 0,6,15 * * * docker compose -f /home/rocky/ShipInfo/docker-compose.prod.yml exec -T python python3 /app/src/aline_search.py >> /home/rocky/scrape.log 2>&1
