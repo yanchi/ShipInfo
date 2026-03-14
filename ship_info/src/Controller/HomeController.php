@@ -49,7 +49,7 @@ class HomeController extends AbstractController
                 ->where('o.route IN (:ids)')
                 ->andWhere('o.operationDate = :today')
                 ->setParameter('ids', $routeIds)
-                ->setParameter('today', $today, Types::DATE_MUTABLE)
+                ->setParameter('today', $today, Types::DATE_IMMUTABLE)
                 ->getQuery()
                 ->getResult();
             foreach ($ops as $op) {

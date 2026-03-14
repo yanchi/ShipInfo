@@ -39,7 +39,7 @@ class DetailsController extends AbstractController
             ->join('o.route', 'r')
             ->addSelect('r')
             ->where('o.operationDate = :today')
-            ->setParameter('today', $today, Types::DATE_MUTABLE)
+            ->setParameter('today', $today, Types::DATE_IMMUTABLE)
             ->orderBy('o.departureTime', 'ASC')
             ->getQuery()
             ->getResult();
