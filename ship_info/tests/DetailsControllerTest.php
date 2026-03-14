@@ -108,16 +108,24 @@ class DetailsControllerTest extends IntegrationTestCase
             ->setUpdatedAt($now);
         $em->persist($company);
 
-        $route = (new Route())
-            ->setName('A港 ⇔ B港')
+        // ユニーク制約 (route_id, operation_date) のため、2便は別々のルートに配置
+        $routeA = (new Route())
+            ->setName('A港 → B港')
             ->setCompany($company)
             ->setCreatedAt($now)
             ->setUpdatedAt($now);
-        $em->persist($route);
+        $em->persist($routeA);
+
+        $routeB = (new Route())
+            ->setName('B港 → A港')
+            ->setCompany($company)
+            ->setCreatedAt($now)
+            ->setUpdatedAt($now);
+        $em->persist($routeB);
 
         // 遅い便を先にInsertして、ソートが挿入順に依存しないことを確認
         $laterOp = (new Operation())
-            ->setRoute($route)
+            ->setRoute($routeA)
             ->setOperationDate(new \DateTime('2025-02-12'))
             ->setStatus(['normal'])
             ->setStatusText(['通常運航'])
@@ -127,7 +135,7 @@ class DetailsControllerTest extends IntegrationTestCase
         $em->persist($laterOp);
 
         $earlierOp = (new Operation())
-            ->setRoute($route)
+            ->setRoute($routeB)
             ->setOperationDate(new \DateTime('2025-02-12'))
             ->setStatus(['normal'])
             ->setStatusText(['通常運航'])
@@ -154,64 +162,6 @@ class DetailsControllerTest extends IntegrationTestCase
                 strpos($content, '08:00'),
                 '出発時刻が昇順で表示されていない'
             );
-        } finally {
-            $this->cleanupEntity($em, Company::class, $companyId);
-        }
-    }
-
-    public function testDetailsPageDeduplicatesSameHourMinuteWithDifferentYear(): void
-    {
-        $client = static::createClient();
-        $em = static::getContainer()->get('doctrine.orm.entity_manager');
-
-        $now = new \DateTimeImmutable();
-        $company = (new Company())
-            ->setName('重複テスト運輸')
-            ->setCreatedAt($now)
-            ->setUpdatedAt($now);
-        $em->persist($company);
-
-        $route = (new Route())
-            ->setName('X港 ⇔ Y港')
-            ->setCompany($company)
-            ->setCreatedAt($now)
-            ->setUpdatedAt($now);
-        $em->persist($route);
-
-        // 正しい年のレコード
-        $correctOp = (new Operation())
-            ->setRoute($route)
-            ->setOperationDate(new \DateTime('2025-02-12'))
-            ->setStatus(['normal'])
-            ->setStatusText(['通常運航'])
-            ->setDepartureTime(new \DateTime('2025-02-12 10:00:00'))
-            ->setCreatedAt($now)
-            ->setUpdatedAt($now);
-        $em->persist($correctOp);
-
-        // スクレイパーバグで年が1900になったレコード（同H:i重複）
-        $buggedOp = (new Operation())
-            ->setRoute($route)
-            ->setOperationDate(new \DateTime('2025-02-12'))
-            ->setStatus(['normal'])
-            ->setStatusText(['通常運航'])
-            ->setDepartureTime(new \DateTime('1900-02-12 10:00:00'))
-            ->setCreatedAt($now)
-            ->setUpdatedAt($now);
-        $em->persist($buggedOp);
-
-        $em->flush();
-        $companyId = $company->getId();
-        $em->clear();
-
-        try {
-            $this->mockClock('2025-02-12');
-            $client->request('GET', '/details/today');
-
-            $content = $client->getResponse()->getContent();
-            $this->assertResponseIsSuccessful();
-            // 同一H:iの重複が1件に集約されているため、"10:00" の出現は1回のみ
-            $this->assertSame(1, substr_count($content, '10:00'), '同一H:iの重複が除去されていない');
         } finally {
             $this->cleanupEntity($em, Company::class, $companyId);
         }
