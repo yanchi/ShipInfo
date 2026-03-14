@@ -82,6 +82,20 @@ Company（フェリー会社）
 
 ---
 
+## テスト
+
+```bash
+# PHP (統合テスト: 11件)
+cd ship_info && php bin/phpunit
+
+# Python (ユニットテスト: 44件)
+cd python && python -m pytest tests/ -v
+```
+
+GitHub Actions で `push` / `pull_request` 時に自動実行される。MySQL サービスコンテナを CI 上で起動し、実DBに対してマイグレーションとテストを実行。
+
+---
+
 ## 設計上のこだわり
 
 ### 1. upsert で冪等なデータ収集
@@ -157,20 +171,6 @@ abstract class IntegrationTestCase extends WebTestCase
     protected function mockClock(string $date): void
 }
 ```
-
----
-
-## テスト
-
-```bash
-# PHP (統合テスト: 11件)
-cd ship_info && php bin/phpunit
-
-# Python (ユニットテスト: 44件)
-cd python && python -m pytest tests/ -v
-```
-
-GitHub Actions で `push` / `pull_request` 時に自動実行される。MySQL サービスコンテナを CI 上で起動し、実DBに対してマイグレーションとテストを実行。
 
 ---
 
