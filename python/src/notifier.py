@@ -32,7 +32,7 @@ def send_alert(abnormal_entries: list[dict]) -> None:
         return
 
     try:
-        smtp_port = int(smtp_port_str)
+        smtp_port = int(smtp_port_str.strip())
     except ValueError:
         logging.warning(f"SMTP_PORT の値が不正です: '{smtp_port_str}' → 通知をスキップします。")
         return

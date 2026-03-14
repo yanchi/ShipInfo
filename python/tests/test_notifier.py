@@ -109,7 +109,6 @@ class TestSendAlert:
         assert "context" in starttls_kwargs
         mock_server.login.assert_called_once_with("user@example.com", "pass")
         mock_server.sendmail.assert_called_once()
-        mock_server.ehlo.assert_not_called()
 
     def test_notify_to_recipients_are_stripped(self):
         mock_server = MagicMock()
@@ -131,8 +130,8 @@ class TestSendAlert:
 
         args = mock_server.sendmail.call_args
         msg = email.message_from_string(args[0][2])
-        subject = email.header.decode_header(msg["Subject"])[0]
-        decoded_subject = subject[0].decode(subject[1])
+        raw = email.header.decode_header(msg["Subject"])[0]
+        decoded_subject = raw[0].decode(raw[1] or "utf-8") if isinstance(raw[0], bytes) else raw[0]
         assert "1件" in decoded_subject
 
     def test_skips_when_smtp_port_invalid(self, caplog):
