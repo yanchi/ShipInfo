@@ -31,4 +31,5 @@ RUN echo "APP_ENV=prod\nAPP_SECRET=placeholder" > /var/www/html/.env
 RUN APP_ENV=prod composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # 必要なディレクトリの権限を設定
-RUN mkdir -p /var/www/html/var && chown -R www-data:www-data /var/www/html/var /var/www/html/public
+RUN mkdir -p /var/www/html/var/cache/prod /var/www/html/var/log \
+    && chown -R www-data:www-data /var/www/html/var /var/www/html/public
