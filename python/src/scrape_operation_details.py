@@ -62,7 +62,10 @@ def parse_direction_from_h1(soup):
     h1_tag = soup.find("h1")
     if h1_tag:
         h1_text = h1_tag.get_text(strip=True)
-        return "下り" if "下り便" in h1_text else "上り"
+        if "下り便" in h1_text:
+            return "下り"
+        if "上り便" in h1_text:
+            return "上り"
     return "N/A"
 
 # 全スクレイピング処理の実行

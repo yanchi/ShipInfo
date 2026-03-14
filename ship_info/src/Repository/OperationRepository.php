@@ -18,7 +18,8 @@ class OperationRepository extends ServiceEntityRepository
 
     /**
      * 指定した航路IDの最新 operationDate を持つ Operation を返す。
-     * 同一 route + date の重複は ID が新しいものを優先する。
+     * 同一 route+date の重複が存在する場合は複数件返り得る（id DESC 順）。
+     * 呼び出し側で route ごとに先頭 1 件を採用すること。
      *
      * @param int[] $routeIds
      * @return Operation[]
