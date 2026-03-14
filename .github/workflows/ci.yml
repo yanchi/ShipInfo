@@ -10,6 +10,8 @@ jobs:
   php-tests:
     name: PHPUnit
     runs-on: ubuntu-latest
+    env:
+      APP_ENV: test
 
     services:
       mysql:
@@ -45,14 +47,10 @@ jobs:
 
       - name: Run migrations
         working-directory: ship_info
-        env:
-          APP_ENV: test
         run: php bin/console doctrine:migrations:migrate --no-interaction
 
       - name: Run PHPUnit
         working-directory: ship_info
-        env:
-          APP_ENV: test
         run: php bin/phpunit
 
   python-tests:
