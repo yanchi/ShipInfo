@@ -71,9 +71,11 @@ h2 {
 }
 
 .status {
+    display: inline-block;
     font-weight: bold;
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.85em;
 }
 
 .status.normal {
@@ -89,6 +91,17 @@ h2 {
 .status.cancelled {
     background-color: #f8d7da;
     color: #721c24;
+}
+
+.status.suspend {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+.route-direction {
+    font-size: 0.85em;
+    color: #666;
+    margin: 0 0 0.5rem 0;
 }
 
 footer {
@@ -124,21 +137,7 @@ footer {
     font-size: 16px;
 }
 
-.status {
-    font-weight: bold;
-}
-
-.status.normal {
-    color: green;
-}
-
-.status.cancelled {
-    color: red;
-}
-
-.status.delayed {
-    color: orange;
-}
+/* .status styles consolidated above */
 
 /* お問い合わせページスタイル */
 #contact ul {
@@ -275,15 +274,33 @@ footer {
     .route-card {
         width: 100%;
     }
+
+    .route-cards-container {
+        flex-direction: column;
+    }
+
+    .operation-details {
+        padding: 0;
+    }
 }
 
 @media (max-width: 480px) {
     .route-cards-container {
-        padding: 10px; /* 親要素の余白を調整 */
+        padding: 10px;
     }
 
     .route-card {
-        width: 100%; /* カードの幅を100%にする */
-        margin-bottom: 20px; /* カード間の余白を確保 */
+        width: 100%;
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 375px) {
+    .route-cards-container {
+        padding: 8px;
+    }
+
+    main {
+        padding: 1rem;
     }
 }

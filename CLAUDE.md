@@ -84,7 +84,7 @@ python save_kametoku_info.py
 
 ## 技術スタック
 
-- **Python 3.9+**: スクレイピング (BeautifulSoup / requests)
-- **PHP / Symfony**: ウェブアプリケーション
+- **Python 3.12+**: スクレイピング (BeautifulSoup / requests)
+- **PHP 8.x / Symfony**: ウェブアプリケーション (Twig テンプレート / Doctrine ORM)
 - **MySQL 8.0**: データ永続化
 - **Docker / Docker Compose**: ローカル開発環境

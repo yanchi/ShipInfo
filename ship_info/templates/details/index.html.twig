@@ -11,27 +11,36 @@
         {% if companies is not empty %}
             {% for company in companies %}
                 <div class="company-section">
-                    <h3 class="company-title">フェリー会社: {{ company.name }}</h3>
+                    <h3 class="company-title">{{ company.name }}</h3>
 
                     {% if company.routes is not empty %}
                         <div class="route-cards-container">
                             {% for route in company.routes %}
                                 <div class="route-card">
-                                    <h4 class="route-title">航路: {{ route.name }}</h4>
+                                    <h4 class="route-title">{{ route.name }}</h4>
+                                    {% if route.direction %}
+                                        <p class="route-direction">{{ route.direction }}</p>
+                                    {% endif %}
 
-                                    {% if route.operations is not empty %}
-                                        {% for operation in route.operations %}
+                                    {% set routeOps = operationsByRoute[route.id] ?? [] %}
+                                    {% if routeOps is not empty %}
+                                        {% for operation in routeOps %}
                                             <div class="operation-details">
-                                                <p>運航日: {{ operation.operationDate|date('Y-m-d') }}</p>
-                                                <p>方向: {{ route.direction }}</p>
-                                                <p>状況: {{ operation.getStatusText() }}</p>{# operation.status_textで取れないため、アクセスメソット使用 #}
-                                                <p>出発時刻: {{ operation.departureTime|date('H:i') }}</p>
-                                                <p>到着時刻: {{ operation.arrivalTime|date('H:i') }}</p>
-                                                <p>備考: {{ operation.memo }}</p>
+                                                {% set statusClass = operation.status in ['normal', 'delayed', 'cancelled', 'suspend'] ? operation.status : 'normal' %}
+                                                <span class="status {{ statusClass }}">{{ operation.getStatusText() ?? '通常運航' }}</span>
+                                                {% if operation.departureTime %}
+                                                    <p>出発 {{ operation.departureTime|date('H:i') }}</p>
+                                                {% endif %}
+                                                {% if operation.arrivalTime %}
+                                                    <p>到着 {{ operation.arrivalTime|date('H:i') }}</p>
+                                                {% endif %}
+                                                {% if operation.memo %}
+                                                    <p class="operation-memo">備考: {{ operation.memo }}</p>
+                                                {% endif %}
                                             </div>
                                         {% endfor %}
                                     {% else %}
-                                        <p class="no-data">この航路には本日の運航情報がありません。</p>
+                                        <p class="no-data">本日の運航情報なし</p>
                                     {% endif %}
                                 </div>
                             {% endfor %}
