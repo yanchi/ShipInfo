@@ -96,7 +96,7 @@ require a documented amendment to this constitution.
 
 | Layer | Technology | Version |
 |-------|-----------|---------|
-| Scraping | Python + BeautifulSoup + requests | 3.9+ |
+| Scraping | Python + BeautifulSoup + requests | 3.12+ |
 | Backend / API | PHP + Symfony | latest stable |
 | Database | MySQL | 8.0 |
 | Container runtime | Docker Compose | current stable |

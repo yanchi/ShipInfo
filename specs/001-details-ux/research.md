@@ -42,7 +42,7 @@
 - Twig でステータス値→日本語のマッピングを行う: DB の `status_text` フィールドが既にある以上、二重管理になる。
 - 専用の Twig Extension でバッジ HTML 生成: Principle IV 違反（単一用途の抽象化）。
 
-**Note (Deferred)**: 実際の `status` フィールドの値（`delay` vs `delayed` など）はリリース後に DB データを確認して CSS クラス名を調整する。現状の CSS には `.status.delayed`・`.status.cancelled` があるが、DB の実際の値次第では追記が必要。
+**Note (Resolved 2026-03-14)**: `save_kametoku_info.py` の `_STATUS_CLASS_MAP` により DB の実値は `normal` / `delayed` / `cancelled` / `tag-conditionally` に確定済み。CSS クラス名はこれらに合わせて整備完了。また `status` / `status_text` は複数ステータス対応のため JSON 配列型に変更済み。
 
 **Affected file**: `styles.css` 行 79-92、`details/index.html.twig`
 

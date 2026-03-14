@@ -15,15 +15,15 @@
 | id | int | no | 主キー |
 | route | Route | no | 紐づく航路（FK） |
 | operationDate | DATE | no | 運航日（今日フィルタ対象） |
-| status | string(50) | yes | ステータスコード（CSS クラス名に使用） |
-| status_text | string(50) | yes | ステータス表示テキスト（日本語、DB格納済み） |
+| status | JSON array | yes | ステータスコード配列（CSS クラス名に使用）例: `["normal"]`, `["cancelled", "delayed"]` |
+| status_text | JSON array | yes | ステータス表示テキスト配列（日本語）例: `["通常運航"]`, `["欠航"]` |
 | departureTime | DATETIME | yes | 出発時刻（null なら非表示。ソートキー） |
 | arrivalTime | DATETIME | yes | 到着時刻（null なら非表示） |
 | memo | TEXT | yes | 備考（空/null なら非表示） |
 | createdAt | DATETIME | no | 作成日時 |
 | updatedAt | DATETIME | no | 更新日時 |
 
-**ユニーク制約**: `(route_id, operation_date)` — 1航路1日1レコード
+**ユニーク制約**: `(route_id, operation_date)` — 1航路1日1レコード（`Version20260308000002` migration 適用済み）
 
 ### Route（航路）
 
@@ -73,8 +73,8 @@ ORDER BY o.departureTime ASC
 
 | status 値 | CSS クラス | 表示色 | 備考 |
 |-----------|-----------|--------|------|
-| normal | .status.normal | 緑 | 既存 |
-| delay または delayed | .status.delay / .delayed | 黄 | DB 実値確認後に調整 |
-| cancel または cancelled | .status.cancel / .cancelled | 赤 | DB 実値確認後に調整 |
-| suspend | .status.suspend | グレー | 新規追加 |
-| null / 不明 | .status（クラスなし） | デフォルト | フォールバック |
+| normal | .status.normal | 緑 | 通常運航 |
+| delayed | .status.delayed | 黄 | 遅延（Python `_STATUS_CLASS_MAP` で確定済み） |
+| cancelled | .status.cancelled | 赤 | 欠航（Python `_STATUS_CLASS_MAP` で確定済み） |
+| suspend | .status.suspend | グレー | 運休 |
+| tag-conditionally | .status.tag-conditionally | - | 条件付運航（`_STATUS_CLASS_MAP` 定義済み） |
