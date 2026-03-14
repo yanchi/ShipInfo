@@ -1,0 +1,18 @@
+name: Close PRs 25-42
+
+on:
+  workflow_dispatch:
+
+jobs:
+  close-prs:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Close PRs 25 to 42
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for pr in $(seq 25 42); do
+            gh pr close $pr --repo ${{ github.repository }} || true
+          done
