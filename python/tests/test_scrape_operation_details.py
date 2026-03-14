@@ -99,3 +99,17 @@ class TestGetKametokuInfo:
         soup = _make_soup("<div></div>")
         result = get_kametoku_info(soup, "上り")
         assert result == []
+
+    def test_skips_entry_when_status_div_missing(self):
+        """div.status が存在しない場合、エントリをスキップして空リストを返す"""
+        html = KAMETOKU_HTML.replace('<div class="status">通常運航</div>', "")
+        soup = _make_soup(html)
+        result = get_kametoku_info(soup, "上り")
+        assert result == []
+
+    def test_skips_entry_when_status_is_dash(self):
+        """status が「―」のみの場合（寄港なし）、エントリをスキップして空リストを返す"""
+        html = KAMETOKU_HTML.replace('<div class="status">通常運航</div>', '<div class="status">―</div>')
+        soup = _make_soup(html)
+        result = get_kametoku_info(soup, "上り")
+        assert result == []
