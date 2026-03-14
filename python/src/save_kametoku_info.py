@@ -79,14 +79,16 @@ def save_kametoku_info():
 
                     status_texts = entry["状況詳細"]
                     status_classes = []
+                    has_unknown = False
                     for t in status_texts:
                         css_class = _STATUS_CLASS_MAP.get(t)
                         if css_class is None:
                             logging.warning(f"未知のステータス文字列: '{t}' → 'normal' にフォールバック")
                             css_class = "normal"
+                            has_unknown = True
                         status_classes.append(css_class)
 
-                    if any(c != "normal" for c in status_classes):
+                    if has_unknown or any(c != "normal" for c in status_classes):
                         abnormal_entries.append({
                             "運航日": operation_date,
                             "方向": entry["方向"],

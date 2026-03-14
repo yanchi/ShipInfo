@@ -95,7 +95,7 @@ class TestSendAlert:
                 mock_smtp.return_value.__enter__.return_value = mock_server
                 send_alert(_SAMPLE_ENTRIES)
 
-        mock_smtp.assert_called_once_with("smtp.example.com", 587)
+        mock_smtp.assert_called_once_with("smtp.example.com", 587, timeout=10)
         mock_server.starttls.assert_called_once()
         mock_server.login.assert_called_once_with("user@example.com", "pass")
         mock_server.sendmail.assert_called_once()
@@ -124,6 +124,22 @@ class TestSendAlert:
         subject = email.header.decode_header(msg["Subject"])[0]
         decoded_subject = subject[0].decode(subject[1])
         assert "1件" in decoded_subject
+
+    def test_skips_when_smtp_port_invalid(self, caplog):
+        env = {**_SMTP_ENV, "SMTP_PORT": "invalid"}
+        with patch.dict(os.environ, env, clear=False):
+            with patch("notifier.smtplib.SMTP") as mock_smtp:
+                send_alert(_SAMPLE_ENTRIES)
+        mock_smtp.assert_not_called()
+        assert "スキップ" in caplog.text
+
+    def test_skips_when_notify_to_only_commas(self, caplog):
+        env = {**_SMTP_ENV, "NOTIFY_TO": ",, ,"}
+        with patch.dict(os.environ, env, clear=False):
+            with patch("notifier.smtplib.SMTP") as mock_smtp:
+                send_alert(_SAMPLE_ENTRIES)
+        mock_smtp.assert_not_called()
+        assert "スキップ" in caplog.text
 
     def test_smtp_error_is_caught_and_logged(self, caplog):
         mock_server = MagicMock()

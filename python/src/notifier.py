@@ -19,7 +19,7 @@ def send_alert(abnormal_entries: list[dict]) -> None:
         return
 
     smtp_host = os.environ.get("SMTP_HOST", "")
-    smtp_port = int(os.environ.get("SMTP_PORT", "587"))
+    smtp_port_str = os.environ.get("SMTP_PORT") or "587"
     smtp_user = os.environ.get("SMTP_USER", "")
     smtp_password = os.environ.get("SMTP_PASSWORD", "")
     notify_from = os.environ.get("NOTIFY_FROM", smtp_user)
@@ -29,18 +29,27 @@ def send_alert(abnormal_entries: list[dict]) -> None:
         logging.warning("SMTP_HOST または NOTIFY_TO が未設定のためメール通知をスキップします。")
         return
 
+    try:
+        smtp_port = int(smtp_port_str)
+    except ValueError:
+        logging.warning(f"SMTP_PORT の値が不正です: '{smtp_port_str}' → 通知をスキップします。")
+        return
+
     subject = f"【ShipInfo】非通常運航ステータスを検出 ({len(abnormal_entries)}件)"
     body = _build_body(abnormal_entries)
+
+    recipients = [addr.strip() for addr in notify_to.split(",") if addr.strip()]
+    if not recipients:
+        logging.warning("有効な宛先アドレスがないためメール通知をスキップします。")
+        return
 
     msg = MIMEText(body, "plain", "utf-8")
     msg["Subject"] = subject
     msg["From"] = notify_from
-    msg["To"] = notify_to
-
-    recipients = [addr.strip() for addr in notify_to.split(",")]
+    msg["To"] = ", ".join(recipients)
 
     try:
-        with smtplib.SMTP(smtp_host, smtp_port) as server:
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=10) as server:
             server.starttls()
             if smtp_user and smtp_password:
                 server.login(smtp_user, smtp_password)
