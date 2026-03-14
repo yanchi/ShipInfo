@@ -41,12 +41,12 @@ class TestBuildBody:
         assert "欠航" in body
         assert "悪天候のため" in body
 
-    def test_備考_na_is_omitted(self):
+    def test_biko_na_is_omitted(self):
         entries = [{**_SAMPLE_ENTRIES[0], "備考": "N/A"}]
         body = _build_body(entries)
         assert "備考" not in body
 
-    def test_備考_none_is_omitted(self):
+    def test_biko_none_is_omitted(self):
         entries = [{**_SAMPLE_ENTRIES[0], "備考": None}]
         body = _build_body(entries)
         assert "備考" not in body
