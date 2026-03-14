@@ -24,7 +24,10 @@ COPY 000-default.conf /etc/apache2/sites-available/000-default.conf
 RUN a2ensite 000-default.conf
 RUN a2enmod rewrite
 
-# 依存関係インストール（APP_ENV=prod で .env 不要にする）
+# Symfonyが.envを要求するので最小限のものを作成（実際の値はdocker-composeの環境変数で上書き）
+RUN echo "APP_ENV=prod\nAPP_SECRET=placeholder" > /var/www/html/.env
+
+# 依存関係インストール
 RUN APP_ENV=prod composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # 必要なディレクトリの権限を設定
