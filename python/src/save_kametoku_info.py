@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 
 from db import get_connection, get_company_id, get_route_id, upsert_operation
+from notifier import send_alert
 from scrape_operation_details import scrape_data
 
 _STATUS_CLASS_MAP = {
@@ -57,6 +58,8 @@ def save_kametoku_info():
     now = datetime.now()
     year = now.year
 
+    abnormal_entries = []
+
     with get_connection() as connection:
         with connection.cursor(buffered=True) as cursor:
             company_id = get_company_id(cursor, company_name)
@@ -76,12 +79,24 @@ def save_kametoku_info():
 
                     status_texts = entry["状況詳細"]
                     status_classes = []
+                    has_unknown = False
                     for t in status_texts:
                         css_class = _STATUS_CLASS_MAP.get(t)
                         if css_class is None:
                             logging.warning(f"未知のステータス文字列: '{t}' → 'normal' にフォールバック")
                             css_class = "normal"
+                            has_unknown = True
                         status_classes.append(css_class)
+
+                    if has_unknown or any(c != "normal" for c in status_classes):
+                        abnormal_entries.append({
+                            "運航日": operation_date,
+                            "方向": entry["方向"],
+                            "状況詳細": status_texts,
+                            "備考": entry["備考"],
+                            "会社名": company_name,
+                        })
+
                     upsert_operation(
                         cursor, route_id, operation_date,
                         status_classes, status_texts,
@@ -91,6 +106,7 @@ def save_kametoku_info():
                     logging.error(f"Error inserting operation: {e}", exc_info=True)
 
     logging.info("データが正常に保存されました。")
+    send_alert(abnormal_entries)
 
 
 if __name__ == "__main__":
