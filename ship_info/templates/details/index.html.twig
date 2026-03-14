@@ -11,7 +11,14 @@
         {% if companies is not empty %}
             {% for company in companies %}
                 <div class="company-section">
-                    <h3 class="company-title">{{ company.name }}</h3>
+                    <h3 class="company-title">
+                        {% set url = companyUrls[company.name] ?? null %}
+                        {% if url %}
+                            <a href="{{ url }}" target="_blank" rel="noopener noreferrer">{{ company.name }}</a>
+                        {% else %}
+                            {{ company.name }}
+                        {% endif %}
+                    </h3>
 
                     {% if company.routes is not empty %}
                         <div class="route-cards-container">

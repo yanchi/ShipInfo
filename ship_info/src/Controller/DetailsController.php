@@ -60,9 +60,15 @@ class DetailsController extends AbstractController
         // テンプレート向けに値のみの配列に変換
         $operationsByRoute = array_map('array_values', $operationsByRoute);
 
+        $companyUrls = [
+            'マリックスライン' => 'https://marixline.com/',
+            "A'LINE" => 'https://www.aline-ferry.com/',
+        ];
+
         return $this->render('details/index.html.twig', [
             'companies' => $companies,
             'operationsByRoute' => $operationsByRoute,
+            'companyUrls' => $companyUrls,
         ]);
     }
 }

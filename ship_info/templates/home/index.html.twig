@@ -9,7 +9,13 @@
         {% if ship_data is not empty %}
             {% for ship in ship_data %}
             <div class="ferry-status">
-                <h3>{{ ship.name }}</h3>
+                <h3>
+                    {% if ship.url %}
+                        <a href="{{ ship.url }}" target="_blank" rel="noopener noreferrer">{{ ship.name }}</a>
+                    {% else %}
+                        {{ ship.name }}
+                    {% endif %}
+                </h3>
                 <ul>
                 {% for route in ship.routes %}
                 <li>{{ route.name }}:

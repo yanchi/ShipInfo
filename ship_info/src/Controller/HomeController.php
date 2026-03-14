@@ -59,8 +59,13 @@ class HomeController extends AbstractController
                     'statuses' => $statuses,
                 ];
             }
+            $urls = [
+                'マリックスライン' => 'https://marixline.com/',
+                "A'LINE" => 'https://www.aline-ferry.com/',
+            ];
             $shipData[] = [
                 'name' => $company->getName(),
+                'url' => $urls[$company->getName()] ?? null,
                 'routes' => $routeData,
             ];
         }
