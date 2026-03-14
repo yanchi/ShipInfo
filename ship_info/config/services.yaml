@@ -7,6 +7,9 @@ parameters:
     app.contact.email: 'info@ferry-info.com'
     app.contact.phone: '123-456-7890'
     app.contact.address: '123 フェリーサービス通り, 那覇市, 日本'
+    app.company_urls:
+        マリックスライン: 'https://marixline.com/'
+        "A'LINE": 'https://www.aline-ferry.com/'
 
 services:
     # default configuration for services in *this* file

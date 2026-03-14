@@ -5,11 +5,16 @@ namespace App\Controller;
 use App\Repository\CompanyRepository;
 use App\Repository\OperationRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class HomeController extends AbstractController
 {
+    public function __construct(
+        #[Autowire(param: 'app.company_urls')] private readonly array $companyUrls,
+    ) {}
+
     #[Route('/', name: 'app_home')]
     public function index(
         CompanyRepository $companyRepository,
@@ -59,13 +64,9 @@ class HomeController extends AbstractController
                     'statuses' => $statuses,
                 ];
             }
-            $urls = [
-                'マリックスライン' => 'https://marixline.com/',
-                "A'LINE" => 'https://www.aline-ferry.com/',
-            ];
             $shipData[] = [
                 'name' => $company->getName(),
-                'url' => $urls[$company->getName()] ?? null,
+                'url' => $this->companyUrls[$company->getName()] ?? null,
                 'routes' => $routeData,
             ];
         }

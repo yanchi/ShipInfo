@@ -6,17 +6,16 @@ use Psr\Clock\ClockInterface;
 use App\Repository\CompanyRepository;
 use App\Repository\OperationRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class DetailsController extends AbstractController
 {
-    private ClockInterface $clock;
-
-    public function __construct(ClockInterface $clock)
-    {
-        $this->clock = $clock;
-    }
+    public function __construct(
+        private readonly ClockInterface $clock,
+        #[Autowire(param: 'app.company_urls')] private readonly array $companyUrls,
+    ) {}
 
     #[Route('/details/today', name: 'app_details_today')]
     public function index(
@@ -60,15 +59,10 @@ class DetailsController extends AbstractController
         // テンプレート向けに値のみの配列に変換
         $operationsByRoute = array_map('array_values', $operationsByRoute);
 
-        $companyUrls = [
-            'マリックスライン' => 'https://marixline.com/',
-            "A'LINE" => 'https://www.aline-ferry.com/',
-        ];
-
         return $this->render('details/index.html.twig', [
             'companies' => $companies,
             'operationsByRoute' => $operationsByRoute,
-            'companyUrls' => $companyUrls,
+            'companyUrls' => $this->companyUrls,
         ]);
     }
 }
