@@ -80,6 +80,14 @@ class TestSendAlert:
         mock_smtp.assert_not_called()
         assert "スキップ" in caplog.text
 
+    def test_skips_when_notify_from_missing(self, caplog):
+        env = {**_SMTP_ENV, "NOTIFY_FROM": "", "SMTP_USER": ""}
+        with patch.dict(os.environ, env, clear=False):
+            with patch("notifier.smtplib.SMTP") as mock_smtp:
+                send_alert(_SAMPLE_ENTRIES)
+        mock_smtp.assert_not_called()
+        assert "スキップ" in caplog.text
+
     def test_skips_when_notify_to_missing(self, caplog):
         env = {**_SMTP_ENV, "NOTIFY_TO": ""}
         with patch.dict(os.environ, env, clear=False):
@@ -97,6 +105,8 @@ class TestSendAlert:
 
         mock_smtp.assert_called_once_with("smtp.example.com", 587, timeout=10)
         mock_server.starttls.assert_called_once()
+        starttls_kwargs = mock_server.starttls.call_args[1]
+        assert "context" in starttls_kwargs
         mock_server.login.assert_called_once_with("user@example.com", "pass")
         mock_server.sendmail.assert_called_once()
         mock_server.ehlo.assert_not_called()

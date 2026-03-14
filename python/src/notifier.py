@@ -2,6 +2,7 @@
 import logging
 import os
 import smtplib
+import ssl
 from email.mime.text import MIMEText
 
 
@@ -25,8 +26,8 @@ def send_alert(abnormal_entries: list[dict]) -> None:
     notify_from = os.environ.get("NOTIFY_FROM", smtp_user)
     notify_to = os.environ.get("NOTIFY_TO", "")
 
-    if not smtp_host or not notify_to:
-        logging.warning("SMTP_HOST または NOTIFY_TO が未設定のためメール通知をスキップします。")
+    if not smtp_host or not notify_to or not notify_from:
+        logging.warning("SMTP_HOST / NOTIFY_TO / NOTIFY_FROM が未設定のためメール通知をスキップします。")
         return
 
     try:
@@ -49,8 +50,9 @@ def send_alert(abnormal_entries: list[dict]) -> None:
     msg["To"] = ", ".join(recipients)
 
     try:
+        context = ssl.create_default_context()
         with smtplib.SMTP(smtp_host, smtp_port, timeout=10) as server:
-            server.starttls()
+            server.starttls(context=context)
             if smtp_user and smtp_password:
                 server.login(smtp_user, smtp_password)
             server.sendmail(notify_from, recipients, msg.as_string())
