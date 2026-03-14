@@ -14,7 +14,8 @@ def send_alert(abnormal_entries: list[dict]) -> None:
             - 運航日: str
             - 方向: str
             - 状況詳細: list[str]
-            - 備考: str
+            - 備考: str | None
+            - 会社名: str
     """
     if not abnormal_entries:
         return
@@ -23,7 +24,7 @@ def send_alert(abnormal_entries: list[dict]) -> None:
     smtp_port_str = os.environ.get("SMTP_PORT") or "587"
     smtp_user = os.environ.get("SMTP_USER", "")
     smtp_password = os.environ.get("SMTP_PASSWORD", "")
-    notify_from = os.environ.get("NOTIFY_FROM", smtp_user)
+    notify_from = os.environ.get("NOTIFY_FROM") or smtp_user
     notify_to = os.environ.get("NOTIFY_TO", "")
 
     if not smtp_host or not notify_to or not notify_from:
