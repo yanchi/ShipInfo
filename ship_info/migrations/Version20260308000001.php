@@ -23,6 +23,9 @@ final class Version20260308000001 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-        $this->addSql('ALTER TABLE operations CHANGE status status LONGTEXT DEFAULT NULL');
+        // JSON 配列を単一値（先頭要素）に変換してから VARCHAR(50) へ戻す
+        // COALESCE で空配列の場合に既存値を保持。JSON_VALID = 0 の非JSON値はそのまま型変換へ
+        $this->addSql("UPDATE operations SET status = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(status, '$[0]')), status) WHERE status IS NOT NULL AND JSON_VALID(status) = 1");
+        $this->addSql('ALTER TABLE operations CHANGE status status VARCHAR(50) DEFAULT NULL');
     }
 }
