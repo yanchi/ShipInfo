@@ -5,9 +5,8 @@ namespace App\Tests;
 use App\Entity\Company;
 use App\Entity\Operation;
 use App\Entity\Route;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class HomeControllerTest extends WebTestCase
+class HomeControllerTest extends IntegrationTestCase
 {
     public function testHomePageReturns200(): void
     {
@@ -88,12 +87,7 @@ class HomeControllerTest extends WebTestCase
             // 古い日付（2025-02-10）の欠航は表示されない
             $this->assertStringNotContainsString('欠航', $content);
         } finally {
-            $em->clear();
-            $company = $em->find(Company::class, $companyId);
-            if ($company) {
-                $em->remove($company);
-                $em->flush();
-            }
+            $this->cleanupEntity($em, Company::class, $companyId);
         }
     }
 
@@ -131,12 +125,7 @@ class HomeControllerTest extends WebTestCase
             // operationがない場合、フォールバック値が表示される
             $this->assertStringContainsString('通常運航', $content);
         } finally {
-            $em->clear();
-            $company = $em->find(Company::class, $companyId);
-            if ($company) {
-                $em->remove($company);
-                $em->flush();
-            }
+            $this->cleanupEntity($em, Company::class, $companyId);
         }
     }
 }
