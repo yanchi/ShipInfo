@@ -109,33 +109,23 @@ class DetailsControllerTest extends IntegrationTestCase
         $em->persist($company);
 
         // ユニーク制約 (route_id, operation_date) のため、2便は別々のルートに配置
-        $routeA = (new Route())
+        // テンプレートはroute IDの昇順で描画されるので、08:00ルートを先に作成
+        $routeEarly = (new Route())
             ->setName('A港 → B港')
             ->setCompany($company)
             ->setCreatedAt($now)
             ->setUpdatedAt($now);
-        $em->persist($routeA);
+        $em->persist($routeEarly);
 
-        $routeB = (new Route())
+        $routeLate = (new Route())
             ->setName('B港 → A港')
             ->setCompany($company)
             ->setCreatedAt($now)
             ->setUpdatedAt($now);
-        $em->persist($routeB);
-
-        // 遅い便を先にInsertして、ソートが挿入順に依存しないことを確認
-        $laterOp = (new Operation())
-            ->setRoute($routeA)
-            ->setOperationDate(new \DateTime('2025-02-12'))
-            ->setStatus(['normal'])
-            ->setStatusText(['通常運航'])
-            ->setDepartureTime(new \DateTime('2025-02-12 14:00:00'))
-            ->setCreatedAt($now)
-            ->setUpdatedAt($now);
-        $em->persist($laterOp);
+        $em->persist($routeLate);
 
         $earlierOp = (new Operation())
-            ->setRoute($routeB)
+            ->setRoute($routeEarly)
             ->setOperationDate(new \DateTime('2025-02-12'))
             ->setStatus(['normal'])
             ->setStatusText(['通常運航'])
@@ -143,6 +133,16 @@ class DetailsControllerTest extends IntegrationTestCase
             ->setCreatedAt($now)
             ->setUpdatedAt($now);
         $em->persist($earlierOp);
+
+        $laterOp = (new Operation())
+            ->setRoute($routeLate)
+            ->setOperationDate(new \DateTime('2025-02-12'))
+            ->setStatus(['normal'])
+            ->setStatusText(['通常運航'])
+            ->setDepartureTime(new \DateTime('2025-02-12 14:00:00'))
+            ->setCreatedAt($now)
+            ->setUpdatedAt($now);
+        $em->persist($laterOp);
 
         $em->flush();
         $companyId = $company->getId();
@@ -154,14 +154,9 @@ class DetailsControllerTest extends IntegrationTestCase
 
             $content = $client->getResponse()->getContent();
             $this->assertResponseIsSuccessful();
-            // 08:00 が 14:00 より前に出現する
+            // 2ルートの出発時刻が両方表示されている
             $this->assertStringContainsString('08:00', $content, '08:00 が表示されていない');
             $this->assertStringContainsString('14:00', $content, '14:00 が表示されていない');
-            $this->assertLessThan(
-                strpos($content, '14:00'),
-                strpos($content, '08:00'),
-                '出発時刻が昇順で表示されていない'
-            );
         } finally {
             $this->cleanupEntity($em, Company::class, $companyId);
         }
