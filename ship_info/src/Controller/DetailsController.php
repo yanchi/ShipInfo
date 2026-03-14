@@ -53,7 +53,7 @@ class DetailsController extends AbstractController
             // 同H:i重複時は年が新しい（正しい）レコードを優先 ※年1900スクレイパーバグ対応
             $opTime = $operation->getDepartureTime();
             $exTime = $existing?->getDepartureTime();
-            if ($existing === null || ($opTime !== null && $exTime !== null && $opTime > $exTime)) {
+            if ($existing === null || ($opTime !== null && ($exTime === null || $opTime > $exTime))) {
                 $operationsByRoute[$routeId][$dedupeKey] = $operation;
             }
         }
