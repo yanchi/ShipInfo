@@ -5,10 +5,9 @@ namespace App\Tests\Controller;
 use App\Entity\Company;
 use App\Entity\Operation;
 use App\Entity\Route;
-use Psr\Clock\ClockInterface;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use App\Tests\IntegrationTestCase;
 
-class DetailsControllerTest extends WebTestCase
+class DetailsControllerTest extends IntegrationTestCase
 {
     public function testDetailsPageReturns200(): void
     {
@@ -93,12 +92,7 @@ class DetailsControllerTest extends WebTestCase
             // 前日の便（欠航）はフィルタで除外される
             $this->assertStringNotContainsString('欠航', $content);
         } finally {
-            $em->clear();
-            $company = $em->find(Company::class, $companyId);
-            if ($company) {
-                $em->remove($company);
-                $em->flush();
-            }
+            $this->cleanupEntity($em, Company::class, $companyId);
         }
     }
 
@@ -161,12 +155,7 @@ class DetailsControllerTest extends WebTestCase
                 '出発時刻が昇順で表示されていない'
             );
         } finally {
-            $em->clear();
-            $company = $em->find(Company::class, $companyId);
-            if ($company) {
-                $em->remove($company);
-                $em->flush();
-            }
+            $this->cleanupEntity($em, Company::class, $companyId);
         }
     }
 
@@ -224,19 +213,8 @@ class DetailsControllerTest extends WebTestCase
             // 同一H:iの重複が1件に集約されているため、"10:00" の出現は1回のみ
             $this->assertSame(1, substr_count($content, '10:00'), '同一H:iの重複が除去されていない');
         } finally {
-            $em->clear();
-            $company = $em->find(Company::class, $companyId);
-            if ($company) {
-                $em->remove($company);
-                $em->flush();
-            }
+            $this->cleanupEntity($em, Company::class, $companyId);
         }
     }
 
-    private function mockClock(string $date): void
-    {
-        $mockClock = $this->createMock(ClockInterface::class);
-        $mockClock->method('now')->willReturn(new \DateTimeImmutable($date));
-        self::getContainer()->set(ClockInterface::class, $mockClock);
-    }
 }
