@@ -13,6 +13,7 @@ services:
       db:
         condition: service_healthy
     environment:
+      TZ: Asia/Tokyo
       MARIXLINE_SERVICE_URL: ${MARIXLINE_SERVICE_URL}
       MYSQL_HOST: ${MYSQL_HOST}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
