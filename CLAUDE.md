@@ -54,8 +54,14 @@ ShipInfo/
 │       ├── DetailsControllerTest.php
 │       └── Controller/ContactControllerTest.php
 ├── docker-compose.yml       # python / symfony / db (MySQL) の3サービス
+├── docker-compose.prod.yml  # 本番用（SYMFONY_BIND でポートを制御）
 ├── Dockerfile.python
-└── Dockerfile.symfony
+├── Dockerfile.symfony
+├── deploy.sh                # 更新デプロイ（git pull → ビルド → マイグレーション）
+├── setup.sh                 # 初回セットアップ（マスターデータ投入・cron登録）
+└── config/deploy/
+    ├── nginx.conf           # Nginx リバースプロキシ設定（Let's Encrypt 対応済み）
+    └── README.md            # VPS デプロイ手順書
 ```
 
 ## 開発環境

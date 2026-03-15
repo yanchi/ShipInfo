@@ -209,6 +209,17 @@ NOTIFY_TO=alert@example.com
 
 ---
 
+## Production Deploy
+
+See [config/deploy/README.md](config/deploy/README.md) for the full VPS deployment guide (Rocky Linux + Docker + Nginx + Let's Encrypt).
+
+```bash
+# Update deploy (git pull → rebuild → migrate)
+bash /home/rocky/ShipInfo/deploy.sh
+```
+
+---
+
 ## Future Work
 
 - PHP enum for `Operation.status` ([#14](https://github.com/yanchi/ShipInfo/issues/14))
