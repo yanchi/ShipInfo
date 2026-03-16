@@ -143,6 +143,18 @@ h2 {
     color: var(--color-status-delayed-text);
 }
 
+.status.tag-cancel,
+.status.tag-cancelled,
+.status.tag-canceled {
+    background-color: var(--color-status-cancelled-bg);
+    color: var(--color-status-cancelled-text);
+}
+
+.status.tag-delayed {
+    background-color: var(--color-status-delayed-bg);
+    color: var(--color-status-delayed-text);
+}
+
 .route-direction {
     font-size: 0.85em;
     color: var(--color-text-light);

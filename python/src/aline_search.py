@@ -1,6 +1,7 @@
 import logging
 import requests
 from datetime import date, datetime, timedelta
+from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from db import get_connection, get_company_id, get_route_id, upsert_operation
 from notifier import send_alert
@@ -79,7 +80,7 @@ def fetch_results():
                 continue
 
             ferry_name = ferry_name_tag.get_text(strip=True)
-            detail_link = BASE_URL + detail_link_tag['href']
+            detail_link = urljoin(BASE_URL, detail_link_tag['href'])
 
             try:
                 detail_response = requests.get(detail_link, timeout=10)
