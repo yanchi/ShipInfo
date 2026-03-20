@@ -127,3 +127,10 @@ docker-compose exec symfony php bin/console doctrine:migrations:migrate --no-int
 - **PHP 8.x / Symfony**: ウェブアプリケーション (Twig テンプレート / Doctrine ORM)
 - **MySQL 8.0**: データ永続化
 - **Docker / Docker Compose**: ローカル開発環境
+
+## Active Technologies
+- PHP 8.x / Symfony (latest stable) + Twig テンプレートエンジン（既存） (001-google-analytics)
+- N/A（DB 変更なし） (001-google-analytics)
+
+## Recent Changes
+- 001-google-analytics: Added PHP 8.x / Symfony (latest stable) + Twig テンプレートエンジン（既存）
