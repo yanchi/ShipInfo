@@ -1,12 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}フェリー運航情報{% endblock %}
-{% block description_text %}フェリーの現在の運航状況を確認できます。欠航情報をいち早くお知らせします。{% endblock %}
+{% block title %}鹿児島〜沖縄・奄美大島フェリー運航情報{% endblock %}
+{% block title_suffix %}{% endblock %}
+{% block description_text %}Aライン・マリックスラインの鹿児島〜那覇・奄美大島間フェリーの最新運航状況。欠航・遅延情報を毎時更新。旅行前に出発港・到着港の運航状況をご確認ください。{% endblock %}
 
 {% block body %}
 <main>
     <section id="home">
-        <h2>現在の運航状況</h2>
+        <h2>現在の運航状況（Aライン・マリックスライン）</h2>
         {% if ship_data is not empty %}
             {% for ship in ship_data %}
             <div class="ferry-status">

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}フェリー運航情報サービス{% endblock %}</title>
-    {%- set page_description -%}{%- block description_text -%}フェリーの運航情報を提供するサービスです。{%- endblock -%}{%- endset -%}
+    <title>{% block title %}フェリー運航情報サービス{% endblock %}{% block title_suffix %} | 鹿児島〜沖縄フェリー運航状況{% endblock %}</title>
+    {%- set page_description -%}{%- block description_text -%}鹿児島〜沖縄・奄美大島を結ぶAライン・マリックスラインのリアルタイム運航状況。欠航・遅延・通常運航を毎時更新でお知らせします。{%- endblock -%}{%- endset -%}
     <meta name="description" content="{{ page_description }}">
     {% set canonical_url = app.request.schemeAndHttpHost ~ app.request.pathInfo %}
     <link rel="canonical" href="{{ canonical_url }}">
@@ -12,7 +12,7 @@
     <meta property="og:description" content="{{ page_description }}">
     <meta property="og:url" content="{{ canonical_url }}">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="フェリー運航情報サービス">
+    <meta property="og:site_name" content="鹿児島〜沖縄フェリー運航情報サービス">
     <meta name="twitter:card" content="summary">
     <link rel="stylesheet" href="{{ asset('/css/styles.css') }}">
     {% if app.environment == 'prod' and ga_measurement_id %}
@@ -28,7 +28,7 @@
 </head>
 <body>
     <header>
-        <h1>フェリー運航情報サービス</h1>
+        <h1>鹿児島〜沖縄・奄美大島 フェリー運航情報</h1>
         <nav>
             <ul>
                 <li><a href="{{ path('app_home') }}">ホーム</a></li>
@@ -43,7 +43,7 @@
     </main>
 
     <footer>
-        <p>&copy; 2025 フェリー運航情報サービス</p>
+        <p>&copy; 2025 鹿児島〜沖縄・奄美大島 フェリー運航情報サービス</p>
     </footer>
 </body>
 </html>
