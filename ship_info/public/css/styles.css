@@ -150,6 +150,7 @@ h2 {
     color: var(--color-status-cancelled-text);
 }
 
+.status.tag-delay,
 .status.tag-delayed {
     background-color: var(--color-status-delayed-bg);
     color: var(--color-status-delayed-text);
