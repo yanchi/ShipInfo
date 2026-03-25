@@ -1,4 +1,4 @@
-"""aline_search の日付パースロジックのテスト"""
+"""aline_search の日付パースロジックおよび方向別ステータス抽出のテスト"""
 import pytest
 from aline_search import _parse_datetime, _parse_operation_date, _extract_direction_status
 

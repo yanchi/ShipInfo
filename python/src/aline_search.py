@@ -30,7 +30,7 @@ _TRAVEL_DELTA_NOBORI = timedelta(hours=15, minutes=30)
 
 
 def _extract_direction_status(excerpt, direction):
-    """excerptから方向別の1行を抽出し、(classes, texts, line) を返す。マッチしなければ None を返す。"""
+    """excerptから方向別の1行を抽出し、(classes, texts, line) を返す。マッチしなければ (None, None, None) を返す。"""
     if not excerpt:
         return None, None, None
     for line in excerpt.split('\n'):

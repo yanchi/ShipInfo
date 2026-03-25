@@ -87,7 +87,7 @@ class HomeControllerTest extends IntegrationTestCase
             // 今日（2025-02-12）の通常運航が表示される
             $this->assertSelectorTextContains('span.status', '通常運航');
             // 古い日付（2025-02-10）の欠航はステータス欄に表示されない
-            $statusTexts = implode('', $crawler->filter('span.status')->each(fn($n) => $n->text()));
+            $statusTexts = implode('', $crawler->filter('span.status')->each(fn($n, $i) => $n->text()));
             $this->assertStringNotContainsString('欠航', $statusTexts);
         } finally {
             $this->cleanupEntity($em, Company::class, $companyId);
