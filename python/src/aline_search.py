@@ -10,6 +10,13 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(mess
 
 BASE_URL = "https://www.aline-ferry.com/search/"
 
+_EXCERPT_STATUS_CLASS_MAP = {
+    "通常運航": "tag-normal",
+    "運航遅延": "tag-delay",
+    "欠航": "tag-cancel",
+    "条件付運航": "tag-conditionally",
+}
+
 # A'LINE フェリー 検索用ポートコード（サイト内部ID）
 _PORT_KAMETOKU = "78"   # 亀徳
 _PORT_NAHA = "83"       # 那覇
@@ -20,6 +27,19 @@ _PORT_KAGOSHIMA = "50"  # 鹿児島
 # 上り（亀徳 → 鹿児島）: 約 15 時間 30 分
 _TRAVEL_DELTA_KUDARI = timedelta(hours=9, minutes=20)
 _TRAVEL_DELTA_NOBORI = timedelta(hours=15, minutes=30)
+
+
+def _extract_direction_status(excerpt, direction):
+    """excerptから方向別の1行を抽出し、(classes, texts, line) を返す。マッチしなければ None を返す。"""
+    if not excerpt:
+        return None, None, None
+    for line in excerpt.split('\n'):
+        if f"{direction}便" in line and "…" in line:
+            status_text = line.split("…", 1)[1].strip()
+            status_class = _EXCERPT_STATUS_CLASS_MAP.get(status_text)
+            if status_class:
+                return [status_class], [status_text], line
+    return None, None, None
 
 
 def _parse_operation_date(date_str):
@@ -46,6 +66,7 @@ def fetch_results():
         {"startDate": today, "startPort": _PORT_KAMETOKU, "endPort": _PORT_NAHA},
     ]
     results = []
+    detail_cache = {}
     for data in search_conditions:
         try:
             response = requests.post(BASE_URL + "result.php", data=data, timeout=10)
@@ -59,6 +80,7 @@ def fetch_results():
         soup = BeautifulSoup(response.text, 'html.parser')
         result_box = soup.find('div', class_='result-box')
         if not result_box:
+            logging.info(f"result-box が見つかりませんでした（便なし or サイト構造変更の可能性）: {data}")
             continue
 
         ports = result_box.find_all('dd')
@@ -82,15 +104,18 @@ def fetch_results():
             ferry_name = ferry_name_tag.get_text(strip=True)
             detail_link = urljoin(BASE_URL, detail_link_tag['href'])
 
-            try:
-                detail_response = requests.get(detail_link, timeout=10)
-            except requests.RequestException as e:
-                logging.error(f"詳細ページの取得に失敗しました: {e} URL: {detail_link}")
-                continue
-            if detail_response.status_code != 200:
-                continue
+            if detail_link not in detail_cache:
+                try:
+                    detail_response = requests.get(detail_link, timeout=10)
+                except requests.RequestException as e:
+                    logging.error(f"詳細ページの取得に失敗しました: {e} URL: {detail_link}")
+                    continue
+                if detail_response.status_code != 200:
+                    logging.error(f"詳細ページのリクエスト失敗: {detail_response.status_code} URL: {detail_link}")
+                    continue
+                detail_cache[detail_link] = BeautifulSoup(detail_response.text, 'html.parser')
 
-            detail_soup = BeautifulSoup(detail_response.text, 'html.parser')
+            detail_soup = detail_cache[detail_link]
             for box in detail_soup.find_all('div', class_='status-box'):
                 ferry_name_tag_in_box = box.find('div', class_='ferry-name')
                 if not (ferry_name_tag_in_box and ferry_name in ferry_name_tag_in_box.text):
@@ -101,6 +126,8 @@ def fetch_results():
                 spans = tag_list.find_all('span')
                 if not spans:
                     continue
+                excerpt_tag = box.find('div', class_='situation-excerpt')
+                excerpt = excerpt_tag.get_text(separator='\n', strip=True) if excerpt_tag else None
                 results.append({
                     '乗船日': ship_date,
                     '乗船港': start_port,
@@ -109,12 +136,17 @@ def fetch_results():
                     '下船日時': cols[3].text.strip(),
                     'Classes': [" ".join(span.get('class', [])) for span in spans],
                     'Texts': [span.text.strip() for span in spans],
+                    'Excerpt': excerpt,
                 })
     return results
 
 
 def fetch_and_save_data():
     results = fetch_results()
+
+    if not results:
+        logging.info("スクレイピング結果なし、保存をスキップします")
+        return
 
     company_name = "A'LINE"
     now = datetime.now()
@@ -150,19 +182,33 @@ def fetch_and_save_data():
                     else:
                         arrival_time = None
 
-                    if any(c and "normal" not in c.split() for c in result['Classes']):
+                    dir_classes, dir_texts, dir_line = _extract_direction_status(result.get('Excerpt'), direction)
+                    if dir_classes:
+                        classes = dir_classes
+                        texts = dir_texts
+                        memo = dir_line
+                    else:
+                        excerpt = result.get('Excerpt') or ''
+                        has_direction_info = '上り便' in excerpt or '下り便' in excerpt
+                        if has_direction_info:
+                            logging.warning(f"方向別excerptが見つかりませんでした: direction={direction}, excerpt={excerpt}")
+                        classes = result['Classes']
+                        texts = result['Texts']
+                        memo = excerpt or None
+
+                    if any(c and "tag-normal" not in c for c in classes):
                         abnormal_entries.append({
                             "運航日": operation_date,
                             "方向": direction,
-                            "状況詳細": result['Texts'],
-                            "備考": None,
+                            "状況詳細": texts,
+                            "備考": memo,
                             "会社名": company_name,
                         })
 
                     upsert_operation(
                         cursor, route_id, operation_date,
-                        result['Classes'], result['Texts'],
-                        arrival_time, departure_time, None, now
+                        classes, texts,
+                        arrival_time, departure_time, memo, now
                     )
                 except Exception as e:
                     logging.error(f"Error inserting operation: {e}", exc_info=True)

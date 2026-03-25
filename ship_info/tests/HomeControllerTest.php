@@ -81,14 +81,14 @@ class HomeControllerTest extends IntegrationTestCase
         $em->clear();
 
         try {
-            $client->request('GET', '/');
-            $content = $client->getResponse()->getContent();
+            $crawler = $client->request('GET', '/');
 
             $this->assertResponseIsSuccessful();
             // 今日（2025-02-12）の通常運航が表示される
-            $this->assertStringContainsString('通常運航', $content);
-            // 古い日付（2025-02-10）の欠航は表示されない
-            $this->assertStringNotContainsString('欠航', $content);
+            $this->assertSelectorTextContains('span.status', '通常運航');
+            // 古い日付（2025-02-10）の欠航はステータス欄に表示されない
+            $statusTexts = implode('', $crawler->filter('span.status')->each(fn($n) => $n->text()));
+            $this->assertStringNotContainsString('欠航', $statusTexts);
         } finally {
             $this->cleanupEntity($em, Company::class, $companyId);
         }

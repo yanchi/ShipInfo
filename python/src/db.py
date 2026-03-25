@@ -61,6 +61,6 @@ def upsert_operation(cursor, route_id, operation_date, status, status_text,
             status_text = VALUES(status_text),
             arrival_time = COALESCE(VALUES(arrival_time), arrival_time),
             departure_time = COALESCE(VALUES(departure_time), departure_time),
-            memo = COALESCE(VALUES(memo), memo),
+            memo = VALUES(memo),
             updated_at = VALUES(updated_at)
     """, (route_id, operation_date, status, status_text, arrival_time, departure_time, memo, now, now))

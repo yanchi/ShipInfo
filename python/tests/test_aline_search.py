@@ -1,6 +1,6 @@
 """aline_search の日付パースロジックのテスト"""
 import pytest
-from aline_search import _parse_datetime, _parse_operation_date
+from aline_search import _parse_datetime, _parse_operation_date, _extract_direction_status
 
 
 # ──────────────────────────────────────────
@@ -42,3 +42,35 @@ class TestParseDatetime:
 
     def test_end_of_day(self):
         assert _parse_datetime("2025年1月1日 23:59") == "2025-01-01 23:59:00"
+
+
+# ──────────────────────────────────────────
+# _extract_direction_status
+# ──────────────────────────────────────────
+
+class TestExtractDirectionStatus:
+    _MIXED_EXCERPT = "3月24日（火）下り便…運航遅延\n3月26日（木）上り便…通常運航"
+
+    def test_matches_kudari(self):
+        classes, texts, line = _extract_direction_status(self._MIXED_EXCERPT, "下り")
+        assert classes == ["tag-delay"]
+        assert texts == ["運航遅延"]
+        assert "下り便" in line
+
+    def test_matches_nobori(self):
+        classes, texts, line = _extract_direction_status(self._MIXED_EXCERPT, "上り")
+        assert classes == ["tag-normal"]
+        assert texts == ["通常運航"]
+        assert "上り便" in line
+
+    def test_returns_none_when_no_excerpt(self):
+        assert _extract_direction_status(None, "上り") == (None, None, None)
+
+    def test_returns_none_when_no_direction_info(self):
+        """方向別情報がない単純なテキスト（通常運航時など）"""
+        assert _extract_direction_status("通常運航致しております。", "上り") == (None, None, None)
+
+    def test_returns_none_when_unknown_status_text(self):
+        """マッピングにないステータステキストはNoneを返す"""
+        excerpt = "3月26日（木）上り便…点検中"
+        assert _extract_direction_status(excerpt, "上り") == (None, None, None)
