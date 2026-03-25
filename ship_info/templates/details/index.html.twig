@@ -1,12 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}今日の運航情報{% endblock %}
-{% block description_text %}今日のフェリー運航情報です。航路ごとの出発・到着時刻や運航ステータスを確認できます。{% endblock %}
+{% block title %}今日のフェリー運航スケジュール・欠航情報{% endblock %}
+{% block title_suffix %}{% endblock %}
+{% block description_text %}本日のAライン・マリックスラインの出発・到着時刻と運航ステータス。欠航・遅延が発生している航路をひと目で確認。鹿児島〜那覇・鹿児島〜奄美大島の当日スケジュール。{% endblock %}
 
 {% block body %}
 <main>
     <section id="operations-today">
-        <h2>今日の運航情報</h2>
+        <h2>今日のフェリー運航スケジュール・欠航情報</h2>
 
         {% if companies is not empty %}
             {% for company in companies %}

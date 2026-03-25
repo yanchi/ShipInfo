@@ -22,7 +22,7 @@ class DetailsControllerTest extends IntegrationTestCase
         $client = static::createClient();
         $this->mockClock('2025-02-12');
         $client->request('GET', '/details/today');
-        $this->assertSelectorTextContains('h2', '今日の運航情報');
+        $this->assertSelectorTextContains('h2', '今日のフェリー運航スケジュール・欠航情報');
     }
 
     public function testDetailsPageShowsNoDataMessageWhenEmpty(): void
@@ -89,8 +89,8 @@ class DetailsControllerTest extends IntegrationTestCase
             $this->assertResponseIsSuccessful();
             // 今日の運航が描画されていることをステータステキストで確認
             $this->assertStringContainsString('通常運航', $content);
-            // 前日の便（欠航）はフィルタで除外される
-            $this->assertStringNotContainsString('欠航', $content);
+            // 前日の便（欠航・09:00発）はフィルタで除外される
+            $this->assertStringNotContainsString('09:00', $content);
         } finally {
             $this->cleanupEntity($em, Company::class, $companyId);
         }
