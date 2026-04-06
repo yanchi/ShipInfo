@@ -20,6 +20,8 @@
     --color-status-tag-port-text: #004085;
     --color-status-no-info-bg: #e2e3e5;
     --color-status-no-info-text: #6c757d;
+    --color-status-schedule-change-bg: #e8d5f5;
+    --color-status-schedule-change-text: #5a2d82;
     --color-text-light: #666;
 }
 
@@ -154,6 +156,12 @@ h2 {
 .status.tag-delayed {
     background-color: var(--color-status-delayed-bg);
     color: var(--color-status-delayed-text);
+}
+
+.status.tag-schedule-change,
+.status.tag-sche {
+    background-color: var(--color-status-schedule-change-bg);
+    color: var(--color-status-schedule-change-text);
 }
 
 .route-direction {
