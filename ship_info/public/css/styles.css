@@ -312,6 +312,7 @@ footer {
     color: var(--color-text-muted);
     font-style: italic;
     margin-top: 0.25rem;
+    overflow-wrap: break-word;
 }
 
 /* データなしのメッセージ */
