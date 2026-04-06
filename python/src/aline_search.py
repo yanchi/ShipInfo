@@ -15,6 +15,7 @@ _EXCERPT_STATUS_CLASS_MAP = {
     "運航遅延": "tag-delay",
     "欠航": "tag-cancel",
     "条件付運航": "tag-conditionally",
+    "スケジュール変更": "tag-schedule-change",
 }
 
 # A'LINE フェリー 検索用ポートコード（サイト内部ID）
