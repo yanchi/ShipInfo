@@ -254,17 +254,21 @@ footer {
 .route-cards-container {
     display: flex;
     flex-wrap: wrap;
+    align-items: flex-start;
     gap: 20px; /* カード間の余白 */
     max-width: 1200px;
     margin: 0 auto;
 }
 
 .route-card {
+    flex: 1 1 400px;
     background: #ffffff;
     border: 1px solid var(--color-border);
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     padding: 15px;
+    overflow-wrap: break-word;
+    word-break: break-all;
 }
 
 /* カードの内容デザイン */
@@ -354,6 +358,7 @@ footer {
     }
 
     .route-card {
+        flex: none;
         width: 100%;
     }
 
