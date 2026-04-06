@@ -49,7 +49,7 @@ def get_kametoku_info(soup, direction):
 
         exp = service.select_one("div.exp")
         memo = exp.get_text(strip=True) if exp else "N/A"
-        if memo == "下記の詳細条件を確認してください":
+        if memo in ("下記の詳細条件を確認してください", "寄港しません"):
             detail_h2 = soup.select_one("h2.has-vivid-red-color")
             if detail_h2:
                 memo = detail_h2.get_text(strip=True)

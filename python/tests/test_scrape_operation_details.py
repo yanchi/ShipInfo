@@ -150,3 +150,44 @@ class TestGetKametokuInfo:
         soup = _make_soup(html)
         result = get_kametoku_info(soup, "上り")
         assert result[0]["備考"] == "強風のため条件付運航"
+
+    def test_nukko_memo_replaced_by_h2(self):
+        """抜港で備考が「寄港しません」のときh2内容に置換"""
+        html = """
+        <h2 class="has-vivid-red-color">航行経路変更のため亀徳港に寄港しません</h2>
+        <div class="single">
+            <span class="port_name">名瀬港</span>
+            <div class="departure"><span class="date">04月07日</span></div>
+            <div class="status">航行経路変更</div>
+        </div>
+        <div class="single no_status">
+            <span class="port_name">亀徳港</span>
+            <div class="service_single_inner">
+                <div class="status sub">―</div>
+                <div class="exp sub">寄港しません</div>
+            </div>
+        </div>
+        """
+        soup = _make_soup(html)
+        result = get_kametoku_info(soup, "下り")
+        assert result[0]["備考"] == "航行経路変更のため亀徳港に寄港しません"
+
+    def test_nukko_memo_stays_when_no_h2(self):
+        """抜港でh2がなければ備考は「寄港しません」のまま"""
+        html = """
+        <div class="single">
+            <span class="port_name">名瀬港</span>
+            <div class="departure"><span class="date">04月07日</span></div>
+            <div class="status">航行経路変更</div>
+        </div>
+        <div class="single no_status">
+            <span class="port_name">亀徳港</span>
+            <div class="service_single_inner">
+                <div class="status sub">―</div>
+                <div class="exp sub">寄港しません</div>
+            </div>
+        </div>
+        """
+        soup = _make_soup(html)
+        result = get_kametoku_info(soup, "下り")
+        assert result[0]["備考"] == "寄港しません"
