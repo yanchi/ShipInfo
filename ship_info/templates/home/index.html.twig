@@ -22,7 +22,7 @@
                 {% for route in ship.routes %}
                 <li>{{ route.name }}:
                     {% set allClasses = route.statuses|map(s => s.class)|join(' ') %}
-                    {% set needsWarning = 'cancel' in allClasses or 'conditionally' in allClasses or 'sche' in allClasses %}
+                    {% set needsWarning = 'cancel' in allClasses or 'conditionally' in allClasses or 'sche' in allClasses or 'port' in allClasses %}
                     {% for s in route.statuses %}
                         <span class="status {{ s.class ?: 'normal' }}">{{ s.text }}</span>
                     {% endfor %}

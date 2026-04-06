@@ -10,6 +10,7 @@ _STATUS_CLASS_MAP = {
     "欠航": "cancelled",
     "条件付運航": "tag-conditionally",
     "遅延": "delayed",
+    "抜港": "tag-port",
 }
 
 # 亀徳港からの所要時間（スケジュール基準の固定値）

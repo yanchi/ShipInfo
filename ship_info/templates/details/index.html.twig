@@ -37,7 +37,7 @@
                                                 {% set statusClasses = operation.getStatus() ?? [] %}
                                                 {% set statusTexts = operation.getStatusText() ?? [] %}
                                                 {% set statusClassStr = statusClasses|join(' ') %}
-                                                {% set needsWarning = 'cancel' in statusClassStr or 'conditionally' in statusClassStr or 'sche' in statusClassStr %}
+                                                {% set needsWarning = 'cancel' in statusClassStr or 'conditionally' in statusClassStr or 'sche' in statusClassStr or 'port' in statusClassStr %}
                                                 {% for key, statusText in (statusTexts is not empty ? statusTexts : ['通常運航']) %}
                                                     {% set statusClass = statusClasses[key] ?? '' %}
                                                     <span class="status {{ statusClass ?: 'normal' }}">{{ statusText }}</span>

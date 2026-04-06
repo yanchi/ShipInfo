@@ -9,18 +9,19 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(mess
 def get_kametoku_info(soup, direction):
     services = soup.find_all("div", class_="single")
     kametoku_info = []
+    last_date = None
 
     for service in services:
         port_name_tag = service.find("span", class_="port_name")
-        if not (port_name_tag and "亀徳港" in port_name_tag.get_text(strip=True)):
+        if not port_name_tag:
             continue
 
-        # 各データを一度だけ抽出（要素が存在しない場合はスキップ）
         date_tag = service.select_one("div.departure span.date")
-        if not date_tag:
-            logging.warning("div.departure span.date が見つかりません。スキップします。")
+        if date_tag:
+            last_date = date_tag.get_text(strip=True)
+
+        if "亀徳港" not in port_name_tag.get_text(strip=True):
             continue
-        departure_date = date_tag.get_text(strip=True)
 
         status_detail = [div.get_text(strip=True) for div in service.select("div.status")]
 
@@ -28,9 +29,18 @@ def get_kametoku_info(soup, direction):
             logging.warning("div.status が見つかりません。スキップします。")
             continue
 
-        # 「―」のみの場合は寄港なしのためスキップ
+        # 「―」のみの場合は抜港として扱う
         if status_detail == ["―"]:
-            continue
+            status_detail = ["抜港"]
+            if not last_date:
+                logging.warning("抜港だが日付が取得できません。スキップします。")
+                continue
+            departure_date = last_date
+        else:
+            if not date_tag:
+                logging.warning("div.departure span.date が見つかりません。スキップします。")
+                continue
+            departure_date = date_tag.get_text(strip=True)
 
         departure_time_tag = service.select_one("div.departure span.time")
         arrival_time_tag = service.select_one("div.entry span.time")

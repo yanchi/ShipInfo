@@ -99,3 +99,54 @@ class TestGetKametokuInfo:
         soup = _make_soup("<div></div>")
         result = get_kametoku_info(soup, "上り")
         assert result == []
+
+    def test_dashi_converted_to_nukko_using_last_date(self):
+        """「―」は直前の港の日付を使って「抜港」として保存される"""
+        html = """
+        <div class="single">
+            <span class="port_name">名瀬港</span>
+            <div class="departure"><span class="date">04月07日</span></div>
+            <div class="status">航行経路変更</div>
+        </div>
+        <div class="single no_status">
+            <span class="port_name">亀徳港</span>
+            <div class="service_single_inner">
+                <div class="status sub">―</div>
+                <div class="exp sub">寄港しません</div>
+            </div>
+        </div>
+        """
+        soup = _make_soup(html)
+        result = get_kametoku_info(soup, "下り")
+        assert len(result) == 1
+        assert result[0]["状況詳細"] == ["抜港"]
+        assert result[0]["運航日"] == "04月07日"
+
+    def test_dashi_skipped_when_no_last_date(self):
+        """直前の港の日付がない場合は抜港をスキップ"""
+        html = """
+        <div class="single no_status">
+            <span class="port_name">亀徳港</span>
+            <div class="service_single_inner">
+                <div class="status sub">―</div>
+            </div>
+        </div>
+        """
+        soup = _make_soup(html)
+        result = get_kametoku_info(soup, "下り")
+        assert result == []
+
+    def test_memo_replaced_by_h2_when_placeholder(self):
+        """備考が「下記の詳細条件を確認してください」のときh2内容に置換"""
+        html = """
+        <h2 class="has-vivid-red-color">強風のため条件付運航</h2>
+        <div class="single">
+            <span class="port_name">亀徳港</span>
+            <div class="departure"><span class="date">04月07日</span></div>
+            <div class="status">条件付運航</div>
+            <div class="exp">下記の詳細条件を確認してください</div>
+        </div>
+        """
+        soup = _make_soup(html)
+        result = get_kametoku_info(soup, "上り")
+        assert result[0]["備考"] == "強風のため条件付運航"
