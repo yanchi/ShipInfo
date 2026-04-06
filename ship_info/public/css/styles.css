@@ -164,6 +164,13 @@ h2 {
     color: var(--color-status-schedule-change-text);
 }
 
+.status-warning,
+.operation-details p.status-warning {
+    color: #c0392b;
+    font-size: 0.85em;
+    margin: 0 0 0.3rem;
+}
+
 .route-direction {
     font-size: 0.85em;
     color: var(--color-text-light);

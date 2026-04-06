@@ -21,9 +21,14 @@
                 <ul>
                 {% for route in ship.routes %}
                 <li>{{ route.name }}:
+                    {% set allClasses = route.statuses|map(s => s.class)|join(' ') %}
+                    {% set needsWarning = 'cancel' in allClasses or 'conditionally' in allClasses or 'sche' in allClasses %}
                     {% for s in route.statuses %}
                         <span class="status {{ s.class ?: 'normal' }}">{{ s.text }}</span>
                     {% endfor %}
+                    {% if needsWarning %}
+                        <p class="status-warning">出港時間・寄港地が変更になってる可能性があるので公式サイトをご確認ください</p>
+                    {% endif %}
                 </li>
                 {% endfor %}
                 </ul>

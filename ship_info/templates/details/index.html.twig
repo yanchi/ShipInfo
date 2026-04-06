@@ -36,6 +36,8 @@
                                             <div class="operation-details">
                                                 {% set statusClasses = operation.getStatus() ?? [] %}
                                                 {% set statusTexts = operation.getStatusText() ?? [] %}
+                                                {% set statusClassStr = statusClasses|join(' ') %}
+                                                {% set needsWarning = 'cancel' in statusClassStr or 'conditionally' in statusClassStr or 'sche' in statusClassStr %}
                                                 {% for key, statusText in (statusTexts is not empty ? statusTexts : ['通常運航']) %}
                                                     {% set statusClass = statusClasses[key] ?? '' %}
                                                     <span class="status {{ statusClass ?: 'normal' }}">{{ statusText }}</span>
@@ -48,6 +50,9 @@
                                                 {% endif %}
                                                 {% if operation.memo %}
                                                     <p class="operation-memo">備考: {{ operation.memo }}</p>
+                                                {% endif %}
+                                                {% if needsWarning %}
+                                                    <p class="status-warning">出港時間・寄港地が変更になってる可能性があるので公式サイトをご確認ください</p>
                                                 {% endif %}
                                             </div>
                                         {% endfor %}
