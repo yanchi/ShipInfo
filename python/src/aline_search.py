@@ -1,4 +1,5 @@
 import logging
+import re
 import requests
 from datetime import date, datetime, timedelta
 from urllib.parse import urljoin
@@ -28,6 +29,12 @@ _PORT_KAGOSHIMA = "50"  # 鹿児島
 # 上り（亀徳 → 鹿児島）: 約 15 時間 30 分
 _TRAVEL_DELTA_KUDARI = timedelta(hours=9, minutes=20)
 _TRAVEL_DELTA_NOBORI = timedelta(hours=15, minutes=30)
+
+
+def _extract_no_port_notice(text):
+    """status-detail テキストから「※〜には寄港致しません」の行を抽出する。なければ None を返す。"""
+    match = re.search(r'※[^。\n]*には寄港致しません[。]?', text)
+    return match.group(0) if match else None
 
 
 def _extract_direction_status(excerpt, direction):
@@ -129,6 +136,27 @@ def fetch_results():
                     continue
                 excerpt_tag = box.find('div', class_='situation-excerpt')
                 excerpt = excerpt_tag.get_text(separator='\n', strip=True) if excerpt_tag else None
+
+                # スケジュール変更のとき詳細ページから status-detail を取得
+                has_sche = any('tag-sche' in ' '.join(span.get('class', [])) for span in spans)
+                if has_sche:
+                    status_box_link = box.find('a')
+                    status_detail_url = status_box_link['href'] if status_box_link else None
+                    if status_detail_url:
+                        try:
+                            if status_detail_url not in detail_cache:
+                                r = requests.get(status_detail_url, timeout=10)
+                                r.raise_for_status()
+                                detail_cache[status_detail_url] = BeautifulSoup(r.text, 'html.parser')
+                            status_detail_div = detail_cache[status_detail_url].find('div', class_='status-detail')
+                            if status_detail_div:
+                                detail_text = status_detail_div.get_text(separator='\n', strip=True)
+                                notice = _extract_no_port_notice(detail_text)
+                                if notice:
+                                    excerpt = notice
+                        except requests.RequestException as e:
+                            logging.warning(f"スケジュール変更詳細ページの取得に失敗しました: {e} URL: {status_detail_url}")
+
                 results.append({
                     '乗船日': ship_date,
                     '乗船港': start_port,

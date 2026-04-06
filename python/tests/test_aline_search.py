@@ -1,6 +1,6 @@
 """aline_search の日付パースロジックおよび方向別ステータス抽出のテスト"""
 import pytest
-from aline_search import _parse_datetime, _parse_operation_date, _extract_direction_status
+from aline_search import _parse_datetime, _parse_operation_date, _extract_direction_status, _extract_no_port_notice
 
 
 # ──────────────────────────────────────────
@@ -74,3 +74,35 @@ class TestExtractDirectionStatus:
         """マッピングにないステータステキストはNoneを返す"""
         excerpt = "3月26日（木）上り便…点検中"
         assert _extract_direction_status(excerpt, "上り") == (None, None, None)
+
+
+# ──────────────────────────────────────────
+# _extract_no_port_notice
+# ──────────────────────────────────────────
+
+class TestExtractNoPortNotice:
+    _DETAIL_TEXT = (
+        "スケジュール変更\n"
+        "4月7日(火)那覇港発/上り便「フェリー波之上」は荒天のためスケジュールを変更します。\n"
+        "4月7日(火)名瀬港　20:30着/21:20発\n"
+        "4月8日(水)鹿児島新港　08:30着\n"
+        "※本部港・与論港・和泊港・亀徳港には寄港致しません。\n"
+        "※当日の入出港時間については代理店へお問い合わせください。"
+    )
+
+    def test_extracts_no_port_line(self):
+        result = _extract_no_port_notice(self._DETAIL_TEXT)
+        assert result == "※本部港・与論港・和泊港・亀徳港には寄港致しません。"
+
+    def test_extracts_without_period(self):
+        """句点なしでもマッチする"""
+        text = "※亀徳港には寄港致しません\n次の行"
+        result = _extract_no_port_notice(text)
+        assert result == "※亀徳港には寄港致しません"
+
+    def test_returns_none_when_no_match(self):
+        text = "通常運航致しております。"
+        assert _extract_no_port_notice(text) is None
+
+    def test_returns_none_for_empty_string(self):
+        assert _extract_no_port_notice("") is None
