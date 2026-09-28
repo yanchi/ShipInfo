@@ -5,6 +5,7 @@ services:
       dockerfile: Dockerfile.python
     working_dir: /app
     command: python3 -m http.server 8000
+    restart: unless-stopped
     ports:
       - "8000:8000"
     depends_on:
@@ -30,6 +31,7 @@ services:
       context: .
       dockerfile: Dockerfile.symfony
     working_dir: /var/www/html
+    restart: unless-stopped
     ports:
       - "${SYMFONY_BIND:-127.0.0.1:8080}:80"
     environment:
@@ -48,6 +50,7 @@ services:
 
   db:
     image: mysql:8.0
+    restart: unless-stopped
     environment:
       MYSQL_HOST: ${MYSQL_HOST}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
